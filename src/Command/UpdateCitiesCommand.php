@@ -30,7 +30,11 @@ class UpdateCitiesCommand extends Command
     {
         $io = new SymfonyStyle($input, $output);
 
+        $client = new \GuzzleHttp\Client();
+        $response = $client->request('GET', 'http://api.travelpayouts.com/v2/prices/latest?token='.$this->apiToken);
 
-        $io->success($this->apiToken);
+        $cities = $response->getBody();
+        $cities = \json_decode($cities, true);
+        \var_export($cities);
     }
 }
