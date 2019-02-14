@@ -2,23 +2,33 @@
 
 namespace App\Command;
 
+use App\Entity\City;
+use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\Console\Command\Command;
-use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
-use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
-use Symfony\Component\Console\Style\SymfonyStyle;
 
 class UpdateCitiesCommand extends Command
 {
+    const API_URL_PATTERN = '%s/data/ru/cities.json?token=%s';
+
     protected static $defaultName = 'updateCities';
 
     protected $apiToken;
 
-    public function __construct($apiToken = null, $name = null)
-    {
-        parent::__construct($name);
+    protected $apiUrl;
+
+    protected $em;
+
+    public function __construct(
+        $apiUrl,
+        $apiToken,
+        EntityManagerInterface $em
+    ) {
+        parent::__construct();
         $this->apiToken = $apiToken;
+        $this->apiUrl = $apiUrl;
+        $this->em = $em;
     }
 
     protected function configure()
@@ -28,13 +38,23 @@ class UpdateCitiesCommand extends Command
 
     protected function execute(InputInterface $input, OutputInterface $output)
     {
-        $io = new SymfonyStyle($input, $output);
-
         $client = new \GuzzleHttp\Client();
-        $response = $client->request('GET', 'http://api.travelpayouts.com/v2/prices/latest?token='.$this->apiToken);
+        $url = sprintf(self::API_URL_PATTERN, $this->apiUrl, $this->apiToken);
+        $response = $client->request('GET', $url);
 
         $cities = $response->getBody();
         $cities = \json_decode($cities, true);
-        \var_export($cities);
+        foreach($cities as $cityData)
+        {
+            $city = new City();
+            $city->setName($cityData['name']);
+            $city->setCode($cityData['code']);
+            $city->setLat($cityData['coordinates']['lat']);
+            $city->setLon($cityData['coordinates']['lon']);
+            $city->setCountryCode($cityData['country_code']);
+
+            $this->em->persist($city);
+        }
+        $this->em->flush();
     }
 }
