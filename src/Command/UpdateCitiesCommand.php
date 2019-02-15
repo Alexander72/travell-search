@@ -55,20 +55,26 @@ class UpdateCitiesCommand extends Command
 
         $validator = Validation::createValidator();
         $constraints = new Assert\Collection([
-            'name' => new Assert\NotBlank(),
-            'code' => new Assert\NotBlank(),
-            'coordinates' => new Assert\Collection([
-                'lat' => new Assert\All([
-                    new Assert\NotBlank(),
-                    new Assert\Type('float'),
-                ]),
-                'lon' => new Assert\All([
-                    new Assert\NotBlank(),
-                    new Assert\Type('float'),
-                ]),
-            ]),
-            'country_code' => new Assert\NotBlank(),
-        ]);
+            'fields' => [
+                    'name' => new Assert\NotBlank(),
+                    'code' => new Assert\NotBlank(),
+                    'coordinates' => [
+                        new Assert\NotBlank(),
+                        new Assert\Collection([
+                            'lat' => [
+                                new Assert\NotBlank(),
+                                new Assert\Type('float'),
+                            ],
+                            'lon' => [
+                                new Assert\NotBlank(),
+                                new Assert\Type('float'),
+                            ],
+                        ])
+                    ],
+                    'country_code' => new Assert\NotBlank(),
+                ],
+            'allowExtraFields' => true,
+            ]);
 
         $incorrectCityCount = 0;
         foreach($cities as $cityData)
