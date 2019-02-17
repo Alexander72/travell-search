@@ -11,10 +11,9 @@ class City
 {
     /**
      * @ORM\Id()
-     * @ORM\GeneratedValue()
-     * @ORM\Column(type="integer")
+     * @ORM\Column(type="string", length=10, unique=true)
      */
-    private $id;
+    private $code;
 
     /**
      * @ORM\Column(type="string", length=255)
@@ -34,17 +33,7 @@ class City
     /**
      * @ORM\Column(type="string", length=10)
      */
-    private $code;
-
-    /**
-     * @ORM\Column(type="string", length=10)
-     */
     private $countryCode;
-
-    public function getId(): ?int
-    {
-        return $this->id;
-    }
 
     public function getName(): ?string
     {

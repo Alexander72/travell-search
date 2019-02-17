@@ -8,9 +8,7 @@ use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Style\SymfonyStyle;
-use Symfony\Component\Validator\ConstraintViolation;
 use Symfony\Component\Validator\ConstraintViolationInterface;
-use Symfony\Component\Validator\ConstraintViolationListInterface;
 use Symfony\Component\Validator\Validation;
 use Symfony\Component\Validator\Constraints as Assert;
 
@@ -44,11 +42,15 @@ class UpdateCitiesCommand extends Command
 
     protected function execute(InputInterface $input, OutputInterface $output)
     {
+        $timer = \microtime(true);
         $io = new SymfonyStyle($input, $output);
+        $this->em->getRepository(City::class)->findAll();
 
         $client = new \GuzzleHttp\Client();
         $url = sprintf(self::API_URL_PATTERN, $this->apiUrl, $this->apiToken);
+        $requestTimer = \microtime(true);
         $response = $client->request('GET', $url);
+        $timer = $timer + (\microtime(true) - $requestTimer);
 
         $cities = $response->getBody();
         $cities = \json_decode($cities, true);
@@ -89,21 +91,21 @@ class UpdateCitiesCommand extends Command
                 $city->setLon($cityData['coordinates']['lon']);
                 $city->setCountryCode($cityData['country_code']);
 
-                $this->em->persist($city);
+                $this->em->merge($city);
             }
             else
             {
                 $incorrectCityCount++;
-                $io->warning('There are constraint violations on dataset: '.json_encode($cityData));
+                //$io->warning('There are constraint violations on dataset: '.json_encode($cityData));
                 /** @var ConstraintViolationInterface $violation */
                 foreach($violations as $violation)
                 {
-                    $io->writeln($violation->getPropertyPath().": ".$violation->getMessage());
+                    //$io->writeln($violation->getPropertyPath().": ".$violation->getMessage());
                 }
             }
         }
 
         $this->em->flush();
-        $io->success("Success! Saved ".(count($cities) - $incorrectCityCount)." cities. Incorrect cities: $incorrectCityCount");
+        $io->success("Success! Saved ".(count($cities) - $incorrectCityCount)." cities. Incorrect cities: $incorrectCityCount. Time taken: ".(\microtime(true) - $timer));
     }
 }
