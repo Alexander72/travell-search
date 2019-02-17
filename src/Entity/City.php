@@ -11,7 +11,7 @@ class City
 {
     /**
      * @ORM\Id()
-     * @ORM\Column(type="string", length=10, unique=true)
+     * @ORM\Column(type="string", length=10)
      */
     private $code;
 
@@ -31,9 +31,12 @@ class City
     private $lon;
 
     /**
-     * @ORM\Column(type="string", length=10)
+     * @var Country
+     *
+     * @ORM\ManyToOne(targetEntity="Country")
+     * @ORM\JoinColumn(name="country", referencedColumnName="code")
      */
-    private $countryCode;
+    private $country;
 
     public function getName(): ?string
     {
@@ -83,14 +86,22 @@ class City
         return $this;
     }
 
-    public function getCountryCode(): ?string
+    /**
+     * @return Country
+     */
+    public function getCountry(): Country
     {
-        return $this->countryCode;
+        return $this->country;
     }
 
-    public function setCountryCode(string $countryCode): self
+    /**
+     * @param Country $country
+     *
+     * @return City
+     */
+    public function setCountry(Country $country): City
     {
-        $this->countryCode = $countryCode;
+        $this->country = $country;
 
         return $this;
     }
