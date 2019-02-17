@@ -9,6 +9,8 @@ use Doctrine\ORM\Mapping as ORM;
  */
 class Country
 {
+    const CONTINENT_EUROPE = 'europe';
+
     /**
      * @ORM\Id()
      * @ORM\Column(type="string", length=10)
@@ -24,6 +26,11 @@ class Country
      * @ORM\Column(type="string", length=10, nullable=true)
      */
     private $currency;
+
+    /**
+     * @ORM\Column(type="string", length=100)
+     */
+    private $continent;
 
     public function getCode(): ?string
     {
@@ -60,4 +67,25 @@ class Country
 
         return $this;
     }
+
+    /**
+     * @return mixed
+     */
+    public function getContinent()
+    {
+        return $this->continent;
+    }
+
+    /**
+     * @param mixed $continent
+     *
+     * @return Country
+     */
+    public function setContinent($continent)
+    {
+        $this->continent = $continent;
+
+        return $this;
+    }
+
 }
