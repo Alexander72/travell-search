@@ -29,5 +29,12 @@ services:
         arguments:
             - '%aviasales.api.url%'
             - '%aviasales.api.token%'
+
+    App\Command\UpdateCountriesCommand:
+        arguments:
+            - '%aviasales.api.url%'
+            - '%aviasales.api.token%'
+
+
     # add more service definitions when explicit configuration is needed
     # please note that last definitions always *replace* previous ones
