@@ -3,6 +3,7 @@
 namespace App\Command;
 
 use App\Entity\City;
+use App\Entity\Country;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
@@ -42,15 +43,13 @@ class UpdateCitiesCommand extends Command
 
     protected function execute(InputInterface $input, OutputInterface $output)
     {
-        $timer = \microtime(true);
         $io = new SymfonyStyle($input, $output);
+        $this->em->getRepository(Country::class)->findAll();
         $this->em->getRepository(City::class)->findAll();
 
         $client = new \GuzzleHttp\Client();
         $url = sprintf(self::API_URL_PATTERN, $this->apiUrl, $this->apiToken);
-        $requestTimer = \microtime(true);
         $response = $client->request('GET', $url);
-        $timer = $timer + (\microtime(true) - $requestTimer);
 
         $cities = $response->getBody();
         $cities = \json_decode($cities, true);
@@ -73,7 +72,6 @@ class UpdateCitiesCommand extends Command
                             ],
                         ])
                     ],
-                    'country_code' => new Assert\NotBlank(),
                 ],
             'allowExtraFields' => true,
             ]);
@@ -89,7 +87,7 @@ class UpdateCitiesCommand extends Command
                 $city->setCode($cityData['code']);
                 $city->setLat($cityData['coordinates']['lat']);
                 $city->setLon($cityData['coordinates']['lon']);
-                $city->setCountryCode($cityData['country_code']);
+                $city->setCountry($this->em->getRepository(Country::class)->find($cityData['country_code']));
 
                 $this->em->merge($city);
             }
@@ -106,6 +104,6 @@ class UpdateCitiesCommand extends Command
         }
 
         $this->em->flush();
-        $io->success("Success! Saved ".(count($cities) - $incorrectCityCount)." cities. Incorrect cities: $incorrectCityCount. Time taken: ".(\microtime(true) - $timer));
+        $io->success("Success! Saved ".(count($cities) - $incorrectCityCount)." cities. Incorrect cities: $incorrectCityCount.");
     }
 }
