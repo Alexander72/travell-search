@@ -49,7 +49,7 @@ class UpdateCitiesCommand extends Command
 
         $client = new \GuzzleHttp\Client();
         $url = sprintf(self::API_URL_PATTERN, $this->apiUrl, $this->apiToken);
-        $response = $client->request('GET', $url);
+        $response = $client->request('GET', $url, ['headers' => ['Accept-Encoding' => 'gzip, deflate']]);
 
         $cities = $response->getBody();
         $cities = \json_decode($cities, true);
