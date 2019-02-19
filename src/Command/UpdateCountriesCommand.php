@@ -3,6 +3,7 @@
 namespace App\Command;
 
 use App\Entity\Country;
+use App\Services\ContinentResolveService;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
@@ -24,15 +25,19 @@ class UpdateCountriesCommand extends Command
 
     protected $em;
 
+    protected $continentResolveService;
+
     public function __construct(
         $apiUrl,
         $apiToken,
-        EntityManagerInterface $em
+        EntityManagerInterface $em,
+        ContinentResolveService $continentResolveService
     ) {
         parent::__construct();
         $this->apiToken = $apiToken;
         $this->apiUrl = $apiUrl;
         $this->em = $em;
+        $this->continentResolveService = $continentResolveService;
     }
 
     protected function configure()
@@ -76,6 +81,9 @@ class UpdateCountriesCommand extends Command
             $city->setName($countryData['name']);
             $city->setCode($countryData['code']);
             $city->setCurrency($countryData['currency']);
+
+            $continent = $this->continentResolveService->getContinentByCountryName($countryData['name']);
+            $city->setContinent($continent);
 
             $this->em->merge($city);
         }

@@ -10,6 +10,11 @@ use Doctrine\ORM\Mapping as ORM;
 class Country
 {
     const CONTINENT_EUROPE = 'europe';
+    const CONTINENT_ASIA = 'asia';
+    const CONTINENT_SOUTH_AMERICA = 'south_america';
+    const CONTINENT_NORTH_AMERICA = 'north_america';
+    const CONTINENT_AFRICA = 'africa';
+    const CONTINENT_AUSTRALIA = 'australia';
 
     /**
      * @ORM\Id()
@@ -28,7 +33,7 @@ class Country
     private $currency;
 
     /**
-     * @ORM\Column(type="string", length=100)
+     * @ORM\Column(type="string", length=100, nullable=true)
      */
     private $continent;
 
