@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "60dc548329998332be84f3dc828bd902",
+    "content-hash": "29399a308763b8479962e047d577b852",
     "packages": [
         {
             "name": "doctrine/annotations",
@@ -1894,6 +1894,62 @@
             "time": "2018-12-11T16:59:23+00:00"
         },
         {
+            "name": "symfony/asset",
+            "version": "v4.2.3",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/symfony/asset.git",
+                "reference": "7eee96a8630f9448304ae4f0e3b474ea4e033664"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/symfony/asset/zipball/7eee96a8630f9448304ae4f0e3b474ea4e033664",
+                "reference": "7eee96a8630f9448304ae4f0e3b474ea4e033664",
+                "shasum": ""
+            },
+            "require": {
+                "php": "^7.1.3"
+            },
+            "require-dev": {
+                "symfony/http-foundation": "~3.4|~4.0",
+                "symfony/http-kernel": "~3.4|~4.0"
+            },
+            "suggest": {
+                "symfony/http-foundation": ""
+            },
+            "type": "library",
+            "extra": {
+                "branch-alias": {
+                    "dev-master": "4.2-dev"
+                }
+            },
+            "autoload": {
+                "psr-4": {
+                    "Symfony\\Component\\Asset\\": ""
+                },
+                "exclude-from-classmap": [
+                    "/Tests/"
+                ]
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Fabien Potencier",
+                    "email": "fabien@symfony.com"
+                },
+                {
+                    "name": "Symfony Community",
+                    "homepage": "https://symfony.com/contributors"
+                }
+            ],
+            "description": "Symfony Asset Component",
+            "homepage": "https://symfony.com",
+            "time": "2019-01-16T20:35:37+00:00"
+        },
+        {
             "name": "symfony/cache",
             "version": "v4.2.3",
             "source": {
@@ -3677,6 +3733,60 @@
             "time": "2019-01-16T20:35:37+00:00"
         },
         {
+            "name": "symfony/webpack-encore-bundle",
+            "version": "v1.1.0",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/symfony/webpack-encore-bundle.git",
+                "reference": "9c89795a4577c522101206a1a88272660735257c"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/symfony/webpack-encore-bundle/zipball/9c89795a4577c522101206a1a88272660735257c",
+                "reference": "9c89795a4577c522101206a1a88272660735257c",
+                "shasum": ""
+            },
+            "require": {
+                "php": "^7.1.3",
+                "symfony/asset": "^3.4 || ^4.0",
+                "symfony/config": "^3.4 || ^4.0",
+                "symfony/contracts": "^1.0",
+                "symfony/dependency-injection": "^3.4 || ^4.0",
+                "symfony/http-kernel": "^3.4 || ^4.0"
+            },
+            "require-dev": {
+                "friendsofphp/php-cs-fixer": "^2.14",
+                "symfony/framework-bundle": "^3.4 || ^4.0",
+                "symfony/phpunit-bridge": "^3.4 || ^4.1",
+                "symfony/twig-bundle": "^3.4 || ^4.0",
+                "twig/twig": "^1.35 || ^2.0"
+            },
+            "type": "symfony-bundle",
+            "extra": {
+                "thanks": {
+                    "name": "symfony/webpack-encore",
+                    "url": "https://github.com/symfony/webpack-encore"
+                }
+            },
+            "autoload": {
+                "psr-4": {
+                    "Symfony\\WebpackEncoreBundle\\": "src"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Symfony Community",
+                    "homepage": "https://symfony.com/contributors"
+                }
+            ],
+            "description": "Integration with your Symfony app & Webpack Encore!",
+            "time": "2019-01-17T02:29:30+00:00"
+        },
+        {
             "name": "symfony/yaml",
             "version": "v4.2.3",
             "source": {
@@ -4430,7 +4540,8 @@
     "platform": {
         "php": "^7.1.3",
         "ext-ctype": "*",
-        "ext-iconv": "*"
+        "ext-iconv": "*",
+        "ext-json": "*"
     },
     "platform-dev": []
 }
