@@ -19,13 +19,13 @@ class Route
 
     /**
      * @ORM\ManyToOne(targetEntity="\App\Entity\City")
-     * @ORM\JoinColumn(nullable=false)
+     * @ORM\JoinColumn(nullable=false, referencedColumnName="code")
      */
     private $origin;
 
     /**
      * @ORM\ManyToOne(targetEntity="\App\Entity\City")
-     * @ORM\JoinColumn(nullable=false)
+     * @ORM\JoinColumn(nullable=false, referencedColumnName="code")
      */
     private $destination;
 
