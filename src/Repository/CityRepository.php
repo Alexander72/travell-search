@@ -3,6 +3,7 @@
 namespace App\Repository;
 
 use App\Entity\City;
+use App\Entity\Country;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Symfony\Bridge\Doctrine\RegistryInterface;
 
@@ -17,6 +18,22 @@ class CityRepository extends ServiceEntityRepository
     public function __construct(RegistryInterface $registry)
     {
         parent::__construct($registry, City::class);
+    }
+
+    public function getEuropeCities()
+    {
+        $qb = $this->createQueryBuilder('c');
+        $qb
+            ->leftJoin('c.country', 'country')
+            ->where('country.continent = :europe')
+            ->andWhere($qb->expr()->orX(
+                $qb->expr()->neq('c.country', ':russia_code'),
+                $qb->expr()->in('c.code', ['KGD','LED','MOW','ROV'])
+            ))
+            ->setParameter('europe', Country::CONTINENT_EUROPE)
+            ->setParameter('russia_code', 'RU');
+
+        return $qb->getQuery()->getResult();
     }
 
     // /**

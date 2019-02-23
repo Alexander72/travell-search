@@ -6,13 +6,10 @@ use App\Entity\City;
 use App\Entity\Route;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\Console\Command\Command;
-use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Style\SymfonyStyle;
-use Symfony\Component\Validator\Validation;
-use Symfony\Component\Validator\Constraints as Assert;
 
 class LoadFlightsCommand extends Command
 {
@@ -97,6 +94,9 @@ class LoadFlightsCommand extends Command
         }
 
         $this->em->flush();
-        $io->success("Success! Saved ".count($response['data'])." flights.");
+        $params = ' Origin: '.$input->getOption('origin');
+        $params .= ' Destination: '.$input->getOption('destination');
+        $params .= ' Departure month: '.$input->getOption('depart_month');
+        $io->success("Success! Saved ".count($response['data'])." flights.".$params );
     }
 }
