@@ -61,7 +61,7 @@ class LoadFlightsCommand extends Command
         }
         if($input->getOption('depart_month'))
         {
-            $options['depart_date'] = $input->getOption('depart_month');
+            $options['month'] = $input->getOption('depart_month');
         }
         $url = sprintf(self::API_URL_PATTERN, $this->apiUrl);
         $response = $client->request('GET', $url, ['headers' => ['Accept-Encoding' => 'gzip, deflate'], 'query' => $options]);
@@ -97,6 +97,14 @@ class LoadFlightsCommand extends Command
         $params = ' Origin: '.$input->getOption('origin');
         $params .= ' Destination: '.$input->getOption('destination');
         $params .= ' Departure month: '.$input->getOption('depart_month');
-        $io->success("Success! Saved ".count($response['data'])." flights.".$params );
+        $message = "Saved " . count($response['data']) . " flights." . $params;
+        if(count($response['data']))
+        {
+            $io->success("Success! $message");
+        }
+        else
+        {
+            $io->warning($message);
+        }
     }
 }
