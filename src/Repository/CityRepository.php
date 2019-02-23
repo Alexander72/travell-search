@@ -5,6 +5,7 @@ namespace App\Repository;
 use App\Entity\City;
 use App\Entity\Country;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
+use Doctrine\ORM\Query\Expr\Join;
 use Symfony\Bridge\Doctrine\RegistryInterface;
 
 /**
@@ -24,14 +25,12 @@ class CityRepository extends ServiceEntityRepository
     {
         $qb = $this->createQueryBuilder('c');
         $qb
-            ->leftJoin('c.country', 'country')
+            ->leftJoin('c.country', 'country', Join::WITH, 'country.capital = c.code OR c.code IN (\'KGD\',\'LED\',\'MOW\',\'ROV\')')
             ->where('country.continent = :europe')
             ->andWhere($qb->expr()->orX(
                 $qb->expr()->neq('c.country', ':russia_code'),
                 $qb->expr()->in('c.code', ['KGD','LED','MOW','ROV'])
             ))
-            ->orderBy('RAND()')
-            ->setMaxResults(20)
             ->setParameter('europe', Country::CONTINENT_EUROPE)
             ->setParameter('russia_code', 'RU');
 

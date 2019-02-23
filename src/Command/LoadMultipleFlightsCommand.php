@@ -56,6 +56,7 @@ class LoadMultipleFlightsCommand extends Command
                     'command' => LoadFlightsCommand::getDefaultName(),
                     '--origin' => $origin->getCode(),
                     '--destination' => $destination->getCode(),
+                    '--depart_month' => '2019-05-01',
                 ];
 
                 $greetInput = new ArrayInput($arguments);
@@ -68,12 +69,7 @@ class LoadMultipleFlightsCommand extends Command
                 }
 
                 $i++;
-                \usleep(500);
-
-                if($i > 500)
-                {
-                    break;
-                }
+                \usleep(400);
             }
         }
 
