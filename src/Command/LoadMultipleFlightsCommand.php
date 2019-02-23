@@ -3,6 +3,7 @@
 namespace App\Command;
 
 use App\Entity\City;
+use App\Repository\CityRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\ArrayInput;
@@ -37,7 +38,9 @@ class LoadMultipleFlightsCommand extends Command
         $io = new SymfonyStyle($input, $output);
         $command = $this->getApplication()->find(LoadFlightsCommand::getDefaultName());
 
-        $europeCities = $this->em->getRepository(City::class)->getEuropeCities();
+        /** @var CityRepository $cityRepository */
+        $cityRepository = $this->em->getRepository(City::class);
+        $europeCities = $cityRepository->getEuropeCities();
 
         $i = 0;
         foreach($europeCities as $origin)

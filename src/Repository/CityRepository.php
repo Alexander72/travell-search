@@ -30,6 +30,8 @@ class CityRepository extends ServiceEntityRepository
                 $qb->expr()->neq('c.country', ':russia_code'),
                 $qb->expr()->in('c.code', ['KGD','LED','MOW','ROV'])
             ))
+            ->orderBy('RAND()')
+            ->setMaxResults(20)
             ->setParameter('europe', Country::CONTINENT_EUROPE)
             ->setParameter('russia_code', 'RU');
 
