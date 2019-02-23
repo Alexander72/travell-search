@@ -37,6 +37,12 @@ class Country
      */
     private $continent;
 
+    /**
+     * @ORM\ManyToOne(targetEntity="\App\Entity\City")
+     * @ORM\JoinColumn(nullable=true, referencedColumnName="code")
+     */
+    private $capital;
+
     public function getCode(): ?string
     {
         return $this->code;
@@ -89,6 +95,26 @@ class Country
     public function setContinent($continent)
     {
         $this->continent = $continent;
+
+        return $this;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getCapital()
+    {
+        return $this->capital;
+    }
+
+    /**
+     * @param mixed $capital
+     *
+     * @return Country
+     */
+    public function setCapital($capital)
+    {
+        $this->capital = $capital;
 
         return $this;
     }
