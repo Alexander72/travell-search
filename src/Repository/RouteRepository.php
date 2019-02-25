@@ -2,8 +2,12 @@
 
 namespace App\Repository;
 
+use App\Entity\City;
 use App\Entity\Route;
+use DateTime;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
+use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\ORM\Query\Parameter;
 use Symfony\Bridge\Doctrine\RegistryInterface;
 
 /**
@@ -19,32 +23,30 @@ class RouteRepository extends ServiceEntityRepository
         parent::__construct($registry, Route::class);
     }
 
-    // /**
-    //  * @return Route[] Returns an array of Route objects
-    //  */
-    /*
-    public function findByExampleField($value)
+    /**
+     * @param City     $startCity
+     * @param DateTime $startTime
+     * @param DateTime $finishTime
+     * @param int      $maxPrice
+     *
+     * @return mixed
+     */
+    public function getRoutesFromCity(City $startCity, DateTime $startTime, DateTime $finishTime, int $maxPrice)
     {
-        return $this->createQueryBuilder('r')
-            ->andWhere('r.exampleField = :val')
-            ->setParameter('val', $value)
-            ->orderBy('r.id', 'ASC')
-            ->setMaxResults(10)
-            ->getQuery()
-            ->getResult()
-        ;
-    }
-    */
+        $qb = $this->createQueryBuilder('c');
 
-    /*
-    public function findOneBySomeField($value): ?Route
-    {
-        return $this->createQueryBuilder('r')
-            ->andWhere('r.exampleField = :val')
-            ->setParameter('val', $value)
-            ->getQuery()
-            ->getOneOrNullResult()
-        ;
+        $qb->where('c.origin = :origin');
+        $qb->andWhere('c.departure_day >= :startTime');
+        $qb->andWhere('c.departure_day <= :finishTime');
+        $qb->andWhere('c.cost <= :maxPrice');
+
+        $qb->setParameters(new ArrayCollection([
+            new Parameter('origin', $startCity),
+            new Parameter('startTime', $startTime),
+            new Parameter('finishTime', $finishTime),
+            new Parameter('maxPrice', $maxPrice),
+        ]));
+
+        return $qb->getQuery()->getResult();
     }
-    */
 }
