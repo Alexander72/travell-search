@@ -75,14 +75,14 @@ class LoadFlightsCommand extends Command
             $flight = new Route();
             $flight->setOrigin($cityRepository->find($flightData['origin']));
             $flight->setDestination($cityRepository->find($flightData['destination']));
-            $flight->setCost($flightData['value']);
+            $flight->setPrice($flightData['value']);
             $flight->setDepartureDay(\DateTime::createFromFormat('Y-m-d', $flightData['depart_date']) ?: null);
             $flight->setFoundAt(\DateTime::createFromFormat('Y-m-dTH:i:s', $flightData['found_at']) ?: null);
             $flight->setSavedAt(new \DateTime());
             $flight->setDuration($flightData['duration'] ?: null);
 
             $criteria = [
-                'cost' => $flight->getCost(),
+                'cost' => $flight->getPrice(),
                 'origin' => $flight->getOrigin(),
                 'destination' => $flight->getDestination(),
                 'departureDay' => $flight->getDepartureDay(),

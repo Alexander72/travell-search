@@ -33,7 +33,7 @@ class Route
      * @ORM\Column(type="integer")
      * @var int
      */
-    private $cost;
+    private $price;
 
     /**
      * @ORM\Column(nullable=true, type="date")
@@ -116,19 +116,19 @@ class Route
     /**
      * @return int
      */
-    public function getCost(): int
+    public function getPrice(): int
     {
-        return $this->cost;
+        return $this->price;
     }
 
     /**
-     * @param int $cost
+     * @param int $price
      *
      * @return Route
      */
-    public function setCost(int $cost): Route
+    public function setPrice(int $price): Route
     {
-        $this->cost = $cost;
+        $this->price = $price;
 
         return $this;
     }
