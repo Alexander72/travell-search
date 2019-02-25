@@ -10,35 +10,30 @@ namespace App\Services;
 
 
 use App\Entity\City;
+use App\Entity\Route;
+use App\Entity\Trip;
+use App\Exceptions\IncorrectTripOptionsException;
 use App\Repository\RouteRepository;
+use Symfony\Component\Validator\ConstraintViolationInterface;
+use Symfony\Component\Validator\Validation;
+use Symfony\Component\Validator\Constraints as Assert;
 
 class SearchService
 {
     /**
-     * @var City
+     * @var array
      */
-    private $startCity;
-    /**
-     * @var City
-     */
-    private $finishCity;
-    /**
-     * @var City
-     */
-    private $requiredMiddleCity;
-    /**
-     * @var \DateTime
-     */
-    private $startTime;
-    /**
-     * @var \DateTime
-     */
-    private $finishTime;
+    private $options;
 
     /**
      * @var RouteRepository
      */
     private $routeRepository;
+
+    /**
+     * @var array
+     */
+    private $builtTrip = [];
 
     public function __construct(
         RouteRepository $routeRepository
@@ -46,73 +41,103 @@ class SearchService
         $this->routeRepository = $routeRepository;
     }
 
-    public function setStartCity(City $city)
+    /**
+     * @return array
+     */
+    public function getOptions(): array
     {
-        $this->startCity = $city;
-    }
-
-    public function setFinishCity(City $city)
-    {
-        $this->finishCity = $city;
-    }
-
-    public function setRequiredMiddleCity(City $city)
-    {
-        $this->requiredMiddleCity = $city;
-    }
-
-    public function setStartTime(\DateTime $startTime)
-    {
-        $this->startTime = $startTime;
-    }
-
-    public function setFinishTime(\DateTime $finishTime)
-    {
-        $this->finishTime = $finishTime;
+        return $this->options;
     }
 
     /**
-     * @return City
+     * @param string $optionMane
+     *
+     * @return mixed
      */
-    public function getStartCity(): City
+    public function getOption(string $optionMane)
     {
-        return $this->startCity;
+        return $this->options[$optionMane] ?? null;
     }
 
     /**
-     * @return City
+     * @param array $options
+     *
+     * @return SearchService
      */
-    public function getFinishCity(): City
+    public function setOptions(array $options): SearchService
     {
-        return $this->finishCity;
+        $this->options = $options;
+
+        return $this;
     }
 
     /**
-     * @return City
+     * @throws IncorrectTripOptionsException
      */
-    public function getRequiredMiddleCity(): City
+    public function buildTrip(): ?Trip
     {
-        return $this->requiredMiddleCity;
+        $this->checkOptions();
+
+        $startCity = $this->getOption('startCity');
+        $startTime = $this->getOption('startTime');
+        $finishTime = $this->getOption('finishTime');
+        $maxPrice = $this->getOption('maxPrice');
+
+        return $this->doBuildTrip();
+    }
+
+    private function doBuildTrip(?Trip $trip): ?Trip
+    {
+        /** @var Route $lastRoute */
+        $lastRoute = $trip->getRoutes()->last();
+        $lastRouteDepartureDay = $lastRoute->getDepartureDay();
+        if($lastRouteDepartureDay)
+        {
+            $startCity = $lastRoute->getDestination();
+            $nextRoutesStartTime = (clone $lastRouteDepartureDay)->modify('+1 day');
+            $finishTime = $this->getOption('finishTime');
+            $maxPrice = $this->getOption('maxPrice') - $trip->calculatePrice();
+            $nextRoutes = $this->routeRepository->getRoutesFromCity($startCity, $nextRoutesStartTime, $finishTime, $maxPrice);
+
+            foreach($nextRoutes as $nextRoute)
+            {
+                $newTrip = clone $trip;
+                $newTrip->addRoute($nextRoute);
+                $builtTrip = $this->doBuildTrip($newTrip);
+                if($builtTrip)
+                {
+                    $this->builtTrip[] = $builtTrip;
+                }
+            }
+        }
     }
 
     /**
-     * @return \DateTime
+     * @throws IncorrectTripOptionsException
      */
-    public function getStartTime(): \DateTime
+    private function checkOptions(): void
     {
-        return $this->startTime;
-    }
+        $validator = Validation::createValidator();
+        $constraints = new Assert\Collection([
+            'fields'           => [
+                'startCity'          => [new Assert\NotBlank(), new Assert\Type(City::class)],
+                'finishCity'         => new Assert\NotBlank(),
+                'startTime'          => new Assert\NotBlank(),
+                'finishTime'         => new Assert\NotBlank(),
+                'maxPrice'           => new Assert\NotBlank(),
+                'maxChanges'         => new Assert\NotBlank(),
+                'requiredMiddleCity' => new Assert\NotBlank(),
+            ],
+            'allowExtraFields' => true,
+        ]);
+        $violations = $validator->validate($this->getOptions(), $constraints);
 
-    /**
-     * @return \DateTime
-     */
-    public function getFinishTime(): \DateTime
-    {
-        return $this->finishTime;
-    }
-
-    public function buildTrip()
-    {
-
+        if(count($violations) > 0)
+        {
+            $messages = array_map(function($violation) {
+                return $violation->getMessage();
+            }, $violations);
+            throw new IncorrectTripOptionsException(implode('. ', $messages));
+        }
     }
 }
