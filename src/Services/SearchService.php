@@ -71,6 +71,46 @@ class SearchService
         $this->finishTime = $finishTime;
     }
 
+    /**
+     * @return City
+     */
+    public function getStartCity(): City
+    {
+        return $this->startCity;
+    }
+
+    /**
+     * @return City
+     */
+    public function getFinishCity(): City
+    {
+        return $this->finishCity;
+    }
+
+    /**
+     * @return City
+     */
+    public function getRequiredMiddleCity(): City
+    {
+        return $this->requiredMiddleCity;
+    }
+
+    /**
+     * @return \DateTime
+     */
+    public function getStartTime(): \DateTime
+    {
+        return $this->startTime;
+    }
+
+    /**
+     * @return \DateTime
+     */
+    public function getFinishTime(): \DateTime
+    {
+        return $this->finishTime;
+    }
+
     public function buildTrip()
     {
 
