@@ -82,7 +82,7 @@ class LoadFlightsCommand extends Command
             $flight->setDuration($flightData['duration'] ?: null);
 
             $criteria = [
-                'cost' => $flight->getPrice(),
+                'price' => $flight->getPrice(),
                 'origin' => $flight->getOrigin(),
                 'destination' => $flight->getDestination(),
                 'departureDay' => $flight->getDepartureDay(),
