@@ -94,7 +94,7 @@ class Route
     }
 
     /**
-     * @return mixed
+     * @return City
      */
     public function getDestination()
     {
