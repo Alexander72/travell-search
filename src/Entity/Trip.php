@@ -36,6 +36,7 @@ class Trip
 
     public function __clone()
     {
+        $this->id = null;
         $this->routes = new ArrayCollection($this->routes->toArray());
     }
 
@@ -56,11 +57,6 @@ class Trip
         return $this;
     }
 
-    public function calculatePrice(): int
-    {
-        return array_reduce($this->getRoutes(), function($sum, Route $route){return $sum + $route->getPrice();});
-    }
-
     /**
      * @return Collection|Route[]
      */
@@ -73,6 +69,7 @@ class Trip
     {
         if (!$this->routes->contains($route)) {
             $this->routes[] = $route;
+            $this->setPrice($this->getPrice() + $route->getPrice());
         }
 
         return $this;
@@ -82,6 +79,7 @@ class Trip
     {
         if ($this->routes->contains($route)) {
             $this->routes->removeElement($route);
+            $this->setPrice($this->getPrice() - $route->getPrice());
         }
 
         return $this;

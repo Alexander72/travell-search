@@ -29,16 +29,16 @@ class RouteRepository extends ServiceEntityRepository
      * @param DateTime $finishTime
      * @param int      $maxPrice
      *
-     * @return mixed
+     * @return Route[]
      */
     public function getRoutesFromCity(City $startCity, DateTime $startTime, DateTime $finishTime, int $maxPrice)
     {
         $qb = $this->createQueryBuilder('c');
 
         $qb->where('c.origin = :origin');
-        $qb->andWhere('c.departure_day >= :startTime');
-        $qb->andWhere('c.departure_day <= :finishTime');
-        $qb->andWhere('c.cost <= :maxPrice');
+        $qb->andWhere('c.departureDay >= :startTime');
+        $qb->andWhere('c.departureDay <= :finishTime');
+        $qb->andWhere('c.price <= :maxPrice');
 
         $qb->setParameters(new ArrayCollection([
             new Parameter('origin', $startCity),
