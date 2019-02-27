@@ -47,8 +47,9 @@ class BuildTripController extends AbstractController
      */
     public function index(Request $request)
     {
-        $originCity = $this->cityRepository->findOneBy(['code' => 'MOW']);
-        $destinationCity = $this->cityRepository->findOneBy(['code' => 'AMS']);
+        $this->cityRepository->findAll();
+        $originCity = $this->cityRepository->find('MOW');
+        $destinationCity = $this->cityRepository->find('AMS');
         $options = [
             'startCity' => $originCity,
             'finishCity' => $destinationCity,
