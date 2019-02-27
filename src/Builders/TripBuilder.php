@@ -82,6 +82,8 @@ class TripBuilder
 
         $trip = new Trip();
 
+        $this->routeRepository->preloadRoutes($this->getOption('startTime'), $this->getOption('finishTime'), $this->getOption('maxPrice'));
+
         $this->doBuildTrips($trip);
 
         return $this->builtTrip;

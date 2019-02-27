@@ -18,9 +18,37 @@ use Symfony\Bridge\Doctrine\RegistryInterface;
  */
 class RouteRepository extends ServiceEntityRepository
 {
+    private const DATETIME_FORMAT = 'Y-m-d H:i:s';
+
+    private $preloadedRoutes;
+
     public function __construct(RegistryInterface $registry)
     {
         parent::__construct($registry, Route::class);
+    }
+
+    public function preloadRoutes(DateTime $startTime, DateTime $finishTime, int $maxPrice)
+    {
+        $qb = $this->createQueryBuilder('r');
+        $qb->where('r.departureDay >= :startTime');
+        $qb->andWhere('r.departureDay <= :finishTime');
+        $qb->andWhere('r.price <= :maxPrice');
+        $qb->orderBy('r.departureDay');
+        $qb->orderBy('r.price');
+
+        $qb->setParameters(new ArrayCollection([
+            new Parameter('startTime', $startTime),
+            new Parameter('finishTime', $finishTime),
+            new Parameter('maxPrice', $maxPrice),
+        ]));
+
+        $queryResult = $qb->getQuery()->getResult();
+        foreach($queryResult as $route)
+        {
+            $origin = $route->getOrigin()->getCode();
+            $departureDay = $route->getDepartureDay() ? $route->getDepartureDay()->format(self::DATETIME_FORMAT) : null;
+            $this->preloadedRoutes[$origin][$departureDay][] = $route;
+        }
     }
 
     /**
@@ -33,12 +61,32 @@ class RouteRepository extends ServiceEntityRepository
      */
     public function getRoutesFromCity(City $startCity, DateTime $startTime, DateTime $finishTime, int $maxPrice)
     {
-        $qb = $this->createQueryBuilder('c');
+        if(is_null($this->preloadedRoutes))
+        {
+            return $this->getRoutesFromCityFromDB($startCity, $startTime, $finishTime, $maxPrice);
+        }
+        else
+        {
+            return $this->getRoutesFromCityFromPreloadedCache($startCity, $startTime, $finishTime, $maxPrice);
+        }
+    }
 
-        $qb->where('c.origin = :origin');
-        $qb->andWhere('c.departureDay >= :startTime');
-        $qb->andWhere('c.departureDay <= :finishTime');
-        $qb->andWhere('c.price <= :maxPrice');
+    /**
+     * @param City     $startCity
+     * @param DateTime $startTime
+     * @param DateTime $finishTime
+     * @param int      $maxPrice
+     *
+     * @return array
+     */
+    private function getRoutesFromCityFromDB(City $startCity, DateTime $startTime, DateTime $finishTime, int $maxPrice): array
+    {
+        $qb = $this->createQueryBuilder('r');
+
+        $qb->where('r.origin = :origin');
+        $qb->andWhere('r.departureDay >= :startTime');
+        $qb->andWhere('r.departureDay <= :finishTime');
+        $qb->andWhere('r.price <= :maxPrice');
 
         $qb->setParameters(new ArrayCollection([
             new Parameter('origin', $startCity),
@@ -47,6 +95,39 @@ class RouteRepository extends ServiceEntityRepository
             new Parameter('maxPrice', $maxPrice),
         ]));
 
-        return $qb->getQuery()->getResult();
+        return $qb->getQuery()->useResultCache(true)->useResultCache(true)->getResult();
+    }
+
+    /**
+     * @param City     $startCity
+     * @param DateTime $startTime
+     * @param int      $maxPrice
+     *
+     * @return array
+     */
+    private function getRoutesFromCityFromPreloadedCache(City $startCity, DateTime $startTime, DateTime $finishTime, int $maxPrice): array
+    {
+        $result = [];
+        $routesFromCity = $this->preloadedRoutes[$startCity->getCode()] ?? [];
+        foreach($routesFromCity as $departureDay => $routes)
+        {
+            $departureDatetime = DateTime::createFromFormat(self::DATETIME_FORMAT, $departureDay);
+            if($departureDatetime < $startTime || $departureDatetime > $finishTime)
+            {
+                continue;
+            }
+
+            foreach($routes as $route)
+            {
+                if($route->getPrice() > $maxPrice)
+                {
+                    break;
+                }
+
+                $result[] = $route;
+            }
+        }
+
+        return $result;
     }
 }
