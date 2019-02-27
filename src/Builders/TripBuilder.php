@@ -9,6 +9,7 @@
 namespace App\Builders;
 
 
+use App\Entity\City;
 use App\Entity\Route;
 use App\Entity\Trip;
 use App\Exceptions\IncorrectTripOptionsException;
@@ -33,6 +34,11 @@ class TripBuilder
      * @var array
      */
     private $builtTrip = [];
+
+    /**
+     * @var array
+     */
+    private $cityMinPriceMap = [];
 
     private $startAt;
 
@@ -92,10 +98,6 @@ class TripBuilder
     /**
      * Функция пытается достроить маршрут, пока не будет доступных маршрутов из города, посещенного последним
      *
-     * Не отмечаем города как посещенные, так как допускается посещение одного города дважды,
-     * а по одному и тому же пути мы не пройдем дважды,
-     * так как функция нахождения путей монотонно возрастает по времени
-     *
      * @param Trip  $trip  текущее маршрут
      */
     private function doBuildTrips(Trip $trip)
@@ -104,17 +106,23 @@ class TripBuilder
         {
             return;
         }
+
+        $this->setLastCityInTripVisited($trip);
         $routes = $this->getAvailableRoutesForTrip($trip);
         foreach($routes as $route)
         {
             $tripFork = clone $trip;
 
-
             $tripFork->addRoute($route);
 
-            if($route->getDestination()->getCode() == $this->getOption('finishCity')->getCode())
+            if($this->isFinish($route->getDestination()))
             {
-                $this->builtTrip[]= $tripFork;
+                $this->finalizeTrip($tripFork);
+                continue;
+            }
+
+            if($this->isItPossibleToReduceCityMinPrice($trip, $route->getDestination()))
+            {
                 continue;
             }
 
@@ -182,7 +190,7 @@ class TripBuilder
         /** @var ConstraintViolationListInterface $violations */
         $violations = $validator->validate($this->getOptions(), $constraints);
 
-        if(count($violations) > 0)
+        if($violations->count() > 0)
         {
             $messages = [];
             foreach($violations as $violation)
@@ -190,6 +198,48 @@ class TripBuilder
                 $messages[] = $violation->getMessage();
             }
             throw new IncorrectTripOptionsException(implode(' ', $messages));
+        }
+    }
+
+    /**
+     * @param City $city
+     *
+     * @return bool
+     */
+    private function isFinish(City $city): bool
+    {
+        return $city->getCode() == $this->getOption('finishCity')->getCode();
+    }
+
+    /**
+     * @param Trip $tripFork
+     *
+     * @return Trip
+     */
+    private function finalizeTrip(Trip $tripFork): Trip
+    {
+        return $this->builtTrip[] = $tripFork;
+    }
+
+    /**
+     * @param Trip  $trip
+     * @param City $city
+     *
+     * @return bool
+     */
+    private function isItPossibleToReduceCityMinPrice(Trip $trip, City $city): bool
+    {
+        return isset($this->cityMinPriceMap[$city->getCode()]) && $this->cityMinPriceMap[$city->getCode()] < $trip->getPrice();
+    }
+
+    /**
+     * @param Trip $trip
+     */
+    private function setLastCityInTripVisited(Trip $trip)
+    {
+        if($trip->getRoutes()->count())
+        {
+            $this->cityMinPriceMap[$trip->getRoutes()->last()->getDestination()->getCode()] = $trip->getPrice();
         }
     }
 }
