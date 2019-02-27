@@ -21,6 +21,11 @@ class City
     private $name;
 
     /**
+     * @ORM\Column(type="string", length=255, nullable=true)
+     */
+    private $englishName;
+
+    /**
      * @ORM\Column(type="float")
      */
     private $lat;
@@ -37,6 +42,11 @@ class City
      * @ORM\JoinColumn(name="country", referencedColumnName="code")
      */
     private $country;
+
+    /**
+     * @ORM\Column(type="integer", nullable=true)
+     */
+    private $population;
 
     public function getName(): ?string
     {
@@ -102,6 +112,46 @@ class City
     public function setCountry(Country $country): City
     {
         $this->country = $country;
+
+        return $this;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getEnglishName()
+    {
+        return $this->englishName;
+    }
+
+    /**
+     * @param mixed $englishName
+     *
+     * @return City
+     */
+    public function setEnglishName($englishName)
+    {
+        $this->englishName = $englishName;
+
+        return $this;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getPopulation()
+    {
+        return $this->population;
+    }
+
+    /**
+     * @param mixed $population
+     *
+     * @return City
+     */
+    public function setPopulation($population)
+    {
+        $this->population = $population;
 
         return $this;
     }
