@@ -16,19 +16,33 @@ use Symfony\Bridge\Doctrine\RegistryInterface;
  */
 class CityRepository extends ServiceEntityRepository
 {
+    const MIN_CITY_POPULATION_TO_USE_IT_IN_SEARCH = 400*1000;
+
     public function __construct(RegistryInterface $registry)
     {
         parent::__construct($registry, City::class);
     }
 
-    public function getEuropeCities()
+    /**
+     * Return cities that worst to search routes between.
+     * Returned cities are european country capitals or russian exclusive cities or european large cities
+     *
+     * @return mixed
+     */
+    public function getLargeEuropeCities()
     {
         $qb = $this->createQueryBuilder('c');
         $qb
-            ->leftJoin('c.country', 'country', Join::WITH, 'country.capital = c.code OR c.code IN (\'KGD\',\'LED\',\'MOW\',\'ROV\')')
+            ->leftJoin('c.country', 'country')
             ->where('country.continent = :europe')
             ->andWhere($qb->expr()->orX(
-                $qb->expr()->neq('c.country', ':russia_code'),
+                $qb->expr()->andX(
+                    $qb->expr()->neq('c.country', ':russia_code'),
+                    $qb->expr()->orX(
+                        $qb->expr()->eq('c.country', 'country.capital'),
+                        $qb->expr()->gte('c.population', self::MIN_CITY_POPULATION_TO_USE_IT_IN_SEARCH)
+                    )
+                ),
                 $qb->expr()->in('c.code', ['KGD','LED','MOW','ROV'])
             ))
             ->setParameter('europe', Country::CONTINENT_EUROPE)
@@ -36,33 +50,4 @@ class CityRepository extends ServiceEntityRepository
 
         return $qb->getQuery()->getResult();
     }
-
-    // /**
-    //  * @return City[] Returns an array of City objects
-    //  */
-    /*
-    public function findByExampleField($value)
-    {
-        return $this->createQueryBuilder('c')
-            ->andWhere('c.exampleField = :val')
-            ->setParameter('val', $value)
-            ->orderBy('c.id', 'ASC')
-            ->setMaxResults(10)
-            ->getQuery()
-            ->getResult()
-        ;
-    }
-    */
-
-    /*
-    public function findOneBySomeField($value): ?City
-    {
-        return $this->createQueryBuilder('c')
-            ->andWhere('c.exampleField = :val')
-            ->setParameter('val', $value)
-            ->getQuery()
-            ->getOneOrNullResult()
-        ;
-    }
-    */
 }

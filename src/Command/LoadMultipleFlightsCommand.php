@@ -40,7 +40,7 @@ class LoadMultipleFlightsCommand extends Command
 
         /** @var CityRepository $cityRepository */
         $cityRepository = $this->em->getRepository(City::class);
-        $europeCities = $cityRepository->getEuropeCities();
+        $europeCities = $cityRepository->getLargeEuropeCities();
 
         $i = 0;
         foreach($europeCities as $origin)
