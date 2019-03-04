@@ -81,7 +81,7 @@ class LoadMultipleFlightsCommand extends Command
             foreach($originCities as $origin)
             {
                 /** @TODO use generator */
-                if($origin->getCode() == $state->getOrigin()->getCode())
+                if(!$state->getOrigin() || $origin->getCode() == $state->getOrigin()->getCode())
                 {
                     $skip = false;
                 }
@@ -113,10 +113,11 @@ class LoadMultipleFlightsCommand extends Command
                     \usleep(self::WAIT_TIME_BETWEEN_LOAD_FLIGHTS_COMMAND_CALLS_IN_MICROSECONDS);
                 }
 
-                $state->finish();
-
                 $this->em->flush();
             }
+
+            $state->finish();
+            $this->em->flush();
 
             $io->success('Flights loaded successfully.');
         } finally {

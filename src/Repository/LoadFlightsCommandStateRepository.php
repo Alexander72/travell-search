@@ -33,6 +33,6 @@ class LoadFlightsCommandStateRepository extends ServiceEntityRepository
             'load_flights_type' => LoadFlightsCommandState::TYPE,
         ]);
         $qb->setMaxResults(1);
-        return $qb->getQuery()->getSingleResult();
+        return $qb->getQuery()->getOneOrNullResult();
     }
 }
