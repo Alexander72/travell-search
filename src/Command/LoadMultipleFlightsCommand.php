@@ -4,6 +4,7 @@ namespace App\Command;
 
 use App\Entity\City;
 use App\Entity\LoadFlightsCommandState;
+use App\Generators\CitiesGenerator;
 use App\Repository\CityRepository;
 use App\Repository\LoadFlightsCommandStateRepository;
 use ArrayIterator;
@@ -68,30 +69,15 @@ class LoadMultipleFlightsCommand extends Command
 
             /** @var CityRepository $cityRepository */
             $cityRepository = $this->em->getRepository(City::class);
-            $europeCities = $originCities = $destinationCities = $cityRepository->getLargeEuropeCities();
+            $europeCities = $cityRepository->getLargeEuropeCities();
             $state = $this->getState($europeCities);
 
-            // if($state->getStatus() == LoadFlightsCommandState::STATUS_LOADING)
-            // {
-            //     $originCities = $this->createCitiesIteratorAccordingState($originCities, $state);
-            //     $destinationCities = $this->createCitiesIteratorAccordingState($destinationCities, $state);
-            // }
+            $originCities = new CitiesGenerator($europeCities, $state->getOrigin());
+            $destinationCities = new CitiesGenerator($europeCities, $state->getDestination());
 
-            $skip = true;
-            foreach($originCities as $origin)
+            foreach($originCities->get() as $origin)
             {
-                /** @TODO use generator */
-                if(!$state->getOrigin() || $origin->getCode() == $state->getOrigin()->getCode())
-                {
-                    $skip = false;
-                }
-
-                if($skip)
-                {
-                    continue;
-                }
-
-                foreach($destinationCities as $destination)
+                foreach($destinationCities->get() as $destination)
                 {
                     if($origin->getCode() == $destination->getCode())
                     {
@@ -167,28 +153,4 @@ class LoadMultipleFlightsCommand extends Command
 
         return $greetInput;
     }
-
-    /**
-     * @param array                   $cities
-     * @param LoadFlightsCommandState $state
-     *
-     * @return ArrayIterator
-     * @throws Exception
-     */
-    private function createCitiesIteratorAccordingState(array $cities, LoadFlightsCommandState $state): ArrayIterator
-    {
-        $iterator = new ArrayIterator($cities);
-        while($iterator->current() && $iterator->current()->getCode() != $state->getOrigin()->getCode())
-        {
-            $iterator->next();
-        }
-
-        if(!$iterator->current())
-        {
-            throw new Exception("City {$state->getOrigin()->getCode()} not found in city array. Unable to forward iterator.");
-        }
-
-        return $iterator;
-    }
-
 }
