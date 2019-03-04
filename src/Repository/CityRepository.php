@@ -41,7 +41,7 @@ class CityRepository extends ServiceEntityRepository
                 $qb->expr()->andX(
                     $qb->expr()->neq('c.country', ':russia_code'),
                     $qb->expr()->orX(
-                        $qb->expr()->eq('c.country', 'country.capital'),
+                        $qb->expr()->eq('c.code', 'country.capital'),
                         $qb->expr()->gte('c.population', self::MIN_CITY_POPULATION_TO_USE_IT_IN_SEARCH)
                     )
                 ),
