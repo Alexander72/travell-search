@@ -18,6 +18,8 @@ class CityRepository extends ServiceEntityRepository
 {
     const MIN_CITY_POPULATION_TO_USE_IT_IN_SEARCH = 400*1000;
 
+    const RUSSIAN_DEPARTURE_CITIES = ['KGD', 'LED', 'MOW', 'ROV'];
+
     public function __construct(RegistryInterface $registry)
     {
         parent::__construct($registry, City::class);
@@ -27,7 +29,7 @@ class CityRepository extends ServiceEntityRepository
      * Return cities that worst to search routes between.
      * Returned cities are european country capitals or russian exclusive cities or european large cities
      *
-     * @return mixed
+     * @return City[]
      */
     public function getLargeEuropeCities()
     {
@@ -43,8 +45,9 @@ class CityRepository extends ServiceEntityRepository
                         $qb->expr()->gte('c.population', self::MIN_CITY_POPULATION_TO_USE_IT_IN_SEARCH)
                     )
                 ),
-                $qb->expr()->in('c.code', ['KGD','LED','MOW','ROV'])
+                $qb->expr()->in('c.code', self::RUSSIAN_DEPARTURE_CITIES)
             ))
+            ->orderBy('c.name')
             ->setParameter('europe', Country::CONTINENT_EUROPE)
             ->setParameter('russia_code', 'RU');
 
