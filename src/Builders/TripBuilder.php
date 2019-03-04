@@ -126,7 +126,7 @@ class TripBuilder
                 continue;
             }
 
-            $this->doBuildTrips($tripFork, $route);
+            $this->doBuildTrips($tripFork);
         }
     }
 
