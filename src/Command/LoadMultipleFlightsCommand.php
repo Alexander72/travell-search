@@ -50,7 +50,7 @@ class LoadMultipleFlightsCommand extends Command
     protected function configure()
     {
         $this->setDescription('Loads multiple flights using LoadFlight command');
-        $this->addOption('depart_month', 't', InputOption::VALUE_REQUIRED);
+        $this->addArgument('depart_month_first_day', InputArgument::REQUIRED);
     }
 
     protected function execute(InputInterface $input, OutputInterface $output)
@@ -70,7 +70,7 @@ class LoadMultipleFlightsCommand extends Command
             /** @var CityRepository $cityRepository */
             $cityRepository = $this->em->getRepository(City::class);
             $europeCities = $cityRepository->getLargeEuropeCities();
-            $state = $this->getState($europeCities);
+            $state = $this->getState($europeCities, $input->getArgument('depart_month_first_day'));
 
             $originCities = new CitiesGenerator($europeCities, $state->getOrigin());
             $destinationCities = new CitiesGenerator($europeCities, $state->getDestination());
@@ -111,14 +111,19 @@ class LoadMultipleFlightsCommand extends Command
         }
     }
 
-    private function getState(array $cities): LoadFlightsCommandState
+    private function getState(array $cities, string $departMonthFirstDay): LoadFlightsCommandState
     {
+        $departMonthFirstDay = DateTime::createFromFormat('Y-m-d', $departMonthFirstDay);
         /** @var LoadFlightsCommandStateRepository $loadStateRepository */
         $loadStateRepository = $this->em->getRepository(LoadFlightsCommandState::class);
-        $state = $loadStateRepository->getLoadMultipleFlightsCommandState();
+        $state = $loadStateRepository->getLoadMultipleFlightsCommandState($departMonthFirstDay);
         if(!$state)
         {
             $state = new LoadFlightsCommandState();
+            $state->setParams([
+                'cities' => array_map(function($city){return $city->getCode();}, $cities),
+            ]);
+            $state->setDepartMonthFirstDay($departMonthFirstDay);
             $this->em->persist($state);
         }
 
@@ -146,7 +151,7 @@ class LoadMultipleFlightsCommand extends Command
             'command'        => LoadFlightsCommand::getDefaultName(),
             '--origin'       => $origin->getCode(),
             '--destination'  => $destination->getCode(),
-            '--depart_month' => $input->getOption('depart_month'),
+            '--depart_month' => $input->getArgument('depart_month_first_day'),
         ];
 
         $greetInput = new ArrayInput($arguments);

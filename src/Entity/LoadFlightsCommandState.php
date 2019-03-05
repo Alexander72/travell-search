@@ -53,9 +53,19 @@ class LoadFlightsCommandState
     private $type = self::TYPE;
 
     /**
+     * @ORM\Column(type="date")
+     */
+    private $departMonthFirstDay;
+
+    /**
      * @ORM\Column(type="json", nullable=true)
      */
     private $params;
+
+    /**
+     * @ORM\Column(type="float")
+     */
+    private $percent;
 
     public function getId(): ?int
     {
@@ -167,6 +177,35 @@ class LoadFlightsCommandState
     }
 
     /**
+     * @return mixed
+     */
+    public function getDepartMonthFirstDay()
+    {
+        return $this->departMonthFirstDay;
+    }
+
+
+    /**
+     * @param mixed $departMonthFirstDay
+     *
+     * @return LoadFlightsCommandState
+     */
+    public function setDepartMonthFirstDay($departMonthFirstDay)
+    {
+        $this->departMonthFirstDay = $departMonthFirstDay;
+
+        return $this;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getPercent()
+    {
+        return $this->percent;
+    }
+
+    /**
      * @param \App\Entity\City $origin
      * @param \App\Entity\City $destination
      *
@@ -178,6 +217,7 @@ class LoadFlightsCommandState
         $this->setOrigin($origin);
         $this->setDestination($destination);
         $this->setUpdated(new DateTime());
+        $this->updatePercent($origin->getCode(), $destination->getCode());
     }
 
     /**
@@ -187,5 +227,20 @@ class LoadFlightsCommandState
     {
         $this->setUpdated(new DateTime());
         $this->setStatus(self::STATUS_FINISHED);
+    }
+
+    private function updatePercent(string $originCode, string $destinationCode)
+    {
+        $cities = $this->getParams()['cities'] ?? null;
+        if(!$cities || !\is_array($cities))
+        {
+            throw new \Exception('Cities parameter is not set.');
+        }
+
+        $citiesCount = count($cities);
+        $total = $citiesCount * $citiesCount;
+        $passed = array_search($originCode, $cities) * $citiesCount + array_search($destinationCode, $cities) + 1;
+
+        $this->percent = \round($passed / $total * 100, 2);
     }
 }
