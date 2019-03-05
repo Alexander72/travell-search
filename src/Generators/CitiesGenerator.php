@@ -38,6 +38,11 @@ class CitiesGenerator
         }
     }
 
+    public function reset()
+    {
+        $this->iterator->rewind();
+    }
+
 
     /**
      * @param array $cities
