@@ -99,6 +99,8 @@ class LoadMultipleFlightsCommand extends Command
                     \usleep(self::WAIT_TIME_BETWEEN_LOAD_FLIGHTS_COMMAND_CALLS_IN_MICROSECONDS);
                 }
 
+                $destinationCities->reset();
+
                 $this->em->flush();
             }
 
