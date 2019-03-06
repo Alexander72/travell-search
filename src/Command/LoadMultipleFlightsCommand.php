@@ -24,7 +24,7 @@ class LoadMultipleFlightsCommand extends Command
 {
     const LOCK_NAME = 'loadMultipleFlightsLock';
 
-    const WAIT_TIME_BETWEEN_LOAD_FLIGHTS_COMMAND_CALLS_IN_MICROSECONDS = 300*1000;
+    const WAIT_TIME_BETWEEN_LOAD_FLIGHTS_COMMAND_CALLS_IN_MICROSECONDS = 0;//300*1000;
 
     /**
      * @var EntityManagerInterface
