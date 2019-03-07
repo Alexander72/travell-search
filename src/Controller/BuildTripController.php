@@ -53,8 +53,8 @@ class BuildTripController extends AbstractController
     public function index(Request $request)
     {
         $formBuilder = $this->createFormBuilder();
-        $formBuilder->add('startCity', EntityType::class, ['class' => City::class, 'choice_label' => 'name']);
-        $formBuilder->add('finishCity', EntityType::class, ['class' => City::class, 'choice_label' => 'name']);
+        $formBuilder->add('startCity', EntityType::class, $this->getCityFieldOptions());
+        $formBuilder->add('finishCity', EntityType::class, $this->getCityFieldOptions());
         $formBuilder->add('startTime', DateType::class);
         $formBuilder->add('finishTime', DateType::class);
         $formBuilder->add('maxPrice', IntegerType::class);
@@ -62,32 +62,40 @@ class BuildTripController extends AbstractController
         $formBuilder->add('search', SubmitType::class);
         $form = $formBuilder->getForm();
 
+        $form->handleRequest($request);
+
+        if($form->isSubmitted() && $form->isValid())
+        {
+            $searchOptions = $form->getData();
+
+            $this->tripBuilder->setOptions($searchOptions);
+            $trips = $this->tripBuilder->buildTrips();
+
+            uasort($trips, function($trip1, $trip2){return $trip1->getPrice() <=> $trip2->getPrice();});
+            $trips = \array_slice($trips, 0, 50);
+
+            return $this->render('foundedTrips.twig', ['trips' => $trips]);
+        }
 
         return $this->render('buildTripForm.twig', ['form' => $form->createView()]);
-
-        $this->cityRepository->findAll();
-        $originCity = $this->cityRepository->find('IEV');
-        $destinationCity = $this->cityRepository->find('AMS');
-        $options = [
-            'startCity' => $originCity,
-            'finishCity' => $destinationCity,
-            'startTime' => new DateTime('2019-05-06 00:00:00'),
-            'finishTime' => new DateTime('2019-05-15 00:00:00'),
-            'maxPrice' => 11000,
-            'maxChanges' => 5,
-        ];
-
-
-        $this->tripBuilder->setOptions($options);
-        $trips = $this->tripBuilder->buildTrips();
-
-        uasort($trips, function($trip1, $trip2){return $trip1->getPrice() <=> $trip2->getPrice();});
-        $trips = \array_slice($trips, 0, 50);
-
     }
 
     public function foundedTrips(array $trips)
     {
         return $this->render('foundedTrips.twig', ['trips' => $trips]);
+    }
+
+    /**
+     * @return array
+     */
+    private function getCityFieldOptions(): array
+    {
+        return [
+            'class' => City::class,
+            'choice_label' => 'name',
+            'query_builder' => function(CityRepository $cityRepository) {
+                return $cityRepository->getLargeEuropeCitiesQueryBuilder();
+            }
+        ];
     }
 }
