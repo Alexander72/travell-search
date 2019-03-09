@@ -2,34 +2,5 @@
 
 {% block bootstrap_example %}{% endblock %}
 {% block body %}
-    <div class="py-5 text-center">
-        <h2>Search form</h2>
-        <p class="lead">Select search options</p>
-    </div>
-    <div class="col-md-8 order-md-1">
-        {{ form_start(form) }}
-            <div class="row">
-                <div class="col-md-6 mb-3">
-                    <label for="firstName">First name</label>
-                    <input type="text" class="form-control" id="firstName" placeholder="" value="" required>
-                    <div class="invalid-feedback">
-                        Valid first name is required.
-                    </div>
-                </div>
-                <div class="col-md-6 mb-3">
-                    <label for="lastName">Last name</label>
-                    <input type="text" class="form-control" id="lastName" placeholder="" value="" required>
-                    <div class="invalid-feedback">
-                        Valid last name is required.
-                    </div>
-                </div>
-                <div class="col-md-6 mb-3">
-                    {{ form_row(form.startCity) }}
-                </div>
-                <div class="col-md-6 mb-3">
-                    {{ form_row(form.finishCity) }}
-                </div>
-            </div>
-        {{ form_end(form) }}
-    </div>
+    {{ form(form) }}
 {% endblock %}
