@@ -55,8 +55,8 @@ class BuildTripController extends AbstractController
         $formBuilder = $this->createFormBuilder();
         $formBuilder->add('startCity', EntityType::class, $this->getCityFieldOptions());
         $formBuilder->add('finishCity', EntityType::class, $this->getCityFieldOptions());
-        $formBuilder->add('startTime', DateType::class);
-        $formBuilder->add('finishTime', DateType::class);
+        $formBuilder->add('startTime', DateType::class, ['widget' => 'single_text']);
+        $formBuilder->add('finishTime', DateType::class, ['widget' => 'single_text']);
         $formBuilder->add('maxPrice', IntegerType::class);
         $formBuilder->add('maxChanges', IntegerType::class);
         $formBuilder->add('search', SubmitType::class);
