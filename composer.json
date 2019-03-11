@@ -16,6 +16,7 @@
         "symfony/lock": "4.2.*",
         "symfony/monolog-bundle": "^3.3",
         "symfony/orm-pack": "^1.0",
+        "symfony/security-bundle": "4.2.*",
         "symfony/validator": "4.2.*",
         "symfony/webpack-encore-bundle": "^1.1",
         "symfony/yaml": "4.2.*"
@@ -66,6 +67,7 @@
         }
     },
     "require-dev": {
+        "doctrine/doctrine-fixtures-bundle": "^3.1",
         "symfony/maker-bundle": "^1.11",
         "symfony/profiler-pack": "^1.0"
     }
