@@ -48,7 +48,7 @@ class BuildTripController extends AbstractController
     }
 
     /**
-     * @Route("/buildTrip", name="buildTrip")
+     * @Route("/", name="index")
      */
     public function index(Request $request)
     {
