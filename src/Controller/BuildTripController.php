@@ -52,6 +52,8 @@ class BuildTripController extends AbstractController
      */
     public function index(Request $request)
     {
+        $this->denyAccessUnlessGranted('IS_AUTHENTICATED_REMEMBERED');
+
         $formBuilder = $this->createFormBuilder();
         $formBuilder->add('startCity', EntityType::class, $this->getCityFieldOptions());
         $formBuilder->add('finishCity', EntityType::class, $this->getCityFieldOptions());
