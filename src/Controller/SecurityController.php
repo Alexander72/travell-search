@@ -7,7 +7,7 @@ use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Security\Http\Authentication\AuthenticationUtils;
 
-class LoginController extends AbstractController
+class SecurityController extends AbstractController
 {
     /**
      * @Route("/login", name="login")
@@ -20,5 +20,14 @@ class LoginController extends AbstractController
         $lastUsername = $authenticationUtils->getLastUsername();
 
         return $this->render('login/login-form.twig', ['last_username' => $lastUsername, 'error' => $error]);
+    }
+
+    /**
+     * @Route("/logout", name="logout", methods={"GET"})
+     */
+    public function logout()
+    {
+        // controller can be blank: it will never be executed!
+        throw new \Exception('Don\'t forget to activate logout in security.yaml');
     }
 }
