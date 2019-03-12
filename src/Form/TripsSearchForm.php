@@ -9,7 +9,9 @@
 namespace App\Form;
 
 use App\Entity\City;
+use App\Entity\Country;
 use App\Repository\CityRepository;
+use App\Repository\CountryRepository;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Bridge\Doctrine\Form\Type\EntityType;
@@ -22,6 +24,8 @@ class TripsSearchForm extends AbstractType
 {
     public function buildForm(FormBuilderInterface $formBuilder, array $options)
     {
+        $formBuilder->add('startCountry', EntityType::class, $this->getCountryFieldOptions());
+        $formBuilder->add('finishCountry', EntityType::class, $this->getCountryFieldOptions());
         $formBuilder->add('startCity', EntityType::class, $this->getCityFieldOptions());
         $formBuilder->add('finishCity', EntityType::class, $this->getCityFieldOptions());
         $formBuilder->add('startTime', DateType::class, ['widget' => 'single_text']);
@@ -55,8 +59,25 @@ class TripsSearchForm extends AbstractType
         return [
             'class' => City::class,
             'choice_label' => 'name',
+            'help' => 'Field not required when country is specified.',
             'query_builder' => function(CityRepository $cityRepository) {
                 return $cityRepository->getLargeEuropeCitiesQueryBuilder();
+            }
+        ];
+    }
+
+    /**
+     * @return array
+     */
+    private function getCountryFieldOptions(): array
+    {
+        return [
+            'class' => Country::class,
+            'choice_label' => 'name',
+            'required' => false,
+            'placeholder' => 'Select country',
+            'query_builder' => function(CountryRepository $countryRepository) {
+                return $countryRepository->getEuropeCountriesQueryBuilder();
             }
         ];
     }

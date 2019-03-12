@@ -8,18 +8,11 @@
 
 namespace App\Controller;
 
-
+use Symfony\Component\Routing\Annotation\Route;
 use App\Builders\TripBuilder;
-use App\Entity\City;
 use App\Form\TripsSearchForm;
 use App\Repository\CityRepository;
-use DateTime;
-use Symfony\Bridge\Doctrine\Form\Type\EntityType;
-use Symfony\Component\Form\Extension\Core\Type\DateType;
-use Symfony\Component\Form\Extension\Core\Type\IntegerType;
-use Symfony\Component\Form\Extension\Core\Type\SubmitType;
 use Symfony\Component\HttpFoundation\Request;
-use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 
 class BuildTripController extends AbstractController
@@ -62,12 +55,31 @@ class BuildTripController extends AbstractController
         if($form->isSubmitted() && $form->isValid())
         {
             $searchOptions = $form->getData();
+            $trips = [];
 
-            $this->tripBuilder->setOptions($searchOptions);
-            $trips = $this->tripBuilder->buildTrips();
+            $startCities = [$searchOptions['startCity']];
+            $finishCities = [$searchOptions['finishCity']];
+            if(!empty($searchOptions['startCountry']))
+            {
+                $startCities = $this->cityRepository->getLargeEuropeCities($searchOptions['startCountry']);
+            }
+            if(!empty($searchOptions['finishCountry']))
+            {
+                $finishCities = $this->cityRepository->getLargeEuropeCities($searchOptions['finishCountry']);
+            }
 
-            uasort($trips, function($trip1, $trip2){return $trip1->getPrice() <=> $trip2->getPrice();});
-            $trips = \array_slice($trips, 0, 50);
+            foreach($startCities as $startCity)
+            {
+                foreach($finishCities as $finishCity)
+                {
+                    $searchOptions['startCity'] = $startCity;
+                    $searchOptions['finishCity'] = $finishCity;
+                    $this->tripBuilder->setOptions($searchOptions);
+                    $trips = $trips + $this->tripBuilder->buildTrips();
+                }
+            }
+
+            $trips = $this->postProcessTrips($trips);
 
             return $this->render('foundedTrips.twig', ['trips' => $trips]);
         }
@@ -75,8 +87,18 @@ class BuildTripController extends AbstractController
         return $this->render('buildTripForm.twig', ['form' => $form->createView()]);
     }
 
-    public function foundedTrips(array $trips)
+    /**
+     * @param array $trips
+     *
+     * @return array
+     */
+    private function postProcessTrips(array $trips): array
     {
-        return $this->render('foundedTrips.twig', ['trips' => $trips]);
+        uasort($trips, function($trip1, $trip2) {
+            return $trip1->getPrice() <=> $trip2->getPrice();
+        });
+        $trips = \array_slice($trips, 0, 50);
+
+        return $trips;
     }
 }
