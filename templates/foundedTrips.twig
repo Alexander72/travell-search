@@ -6,7 +6,7 @@
         <h3>Total price: {{ trip.price }}</h3>
         <ul>
             {% for route in trip.routes %}
-                <li>From: {{ route.origin.name }} -> to: {{ route.destination.name }}; Price: {{ route.price }}; Departure at: {{ route.departureDay|date('d.m.Y') }}</li>
+                <li>From: {{ route.origin.name }} -> to: {{ route.destination.name }}; Price: {{ route.price }}; Departure at: {{ route.departureDay|date('d.m.Y') }}; Flight saved at {{ route.savedAt|date('d.m.Y') }}</li>
             {% endfor %}
         </ul>
     {% else %}
