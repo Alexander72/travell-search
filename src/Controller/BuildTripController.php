@@ -11,6 +11,7 @@ namespace App\Controller;
 
 use App\Builders\TripBuilder;
 use App\Entity\City;
+use App\Form\TripsSearchForm;
 use App\Repository\CityRepository;
 use DateTime;
 use Symfony\Bridge\Doctrine\Form\Type\EntityType;
@@ -54,15 +55,7 @@ class BuildTripController extends AbstractController
     {
         $this->denyAccessUnlessGranted('IS_AUTHENTICATED_REMEMBERED');
 
-        $formBuilder = $this->createFormBuilder();
-        $formBuilder->add('startCity', EntityType::class, $this->getCityFieldOptions());
-        $formBuilder->add('finishCity', EntityType::class, $this->getCityFieldOptions());
-        $formBuilder->add('startTime', DateType::class, ['widget' => 'single_text']);
-        $formBuilder->add('finishTime', DateType::class, ['widget' => 'single_text']);
-        $formBuilder->add('maxPrice', IntegerType::class);
-        $formBuilder->add('maxChanges', IntegerType::class);
-        $formBuilder->add('search', SubmitType::class);
-        $form = $formBuilder->getForm();
+        $form = $this->createForm(TripsSearchForm::class);
 
         $form->handleRequest($request);
 
@@ -85,19 +78,5 @@ class BuildTripController extends AbstractController
     public function foundedTrips(array $trips)
     {
         return $this->render('foundedTrips.twig', ['trips' => $trips]);
-    }
-
-    /**
-     * @return array
-     */
-    private function getCityFieldOptions(): array
-    {
-        return [
-            'class' => City::class,
-            'choice_label' => 'name',
-            'query_builder' => function(CityRepository $cityRepository) {
-                return $cityRepository->getLargeEuropeCitiesQueryBuilder();
-            }
-        ];
     }
 }
