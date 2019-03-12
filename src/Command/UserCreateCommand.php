@@ -15,6 +15,7 @@ use Symfony\Component\Security\Core\Encoder\UserPasswordEncoderInterface;
 
 class UserCreateCommand extends Command
 {
+    const OPTION_MODIFY_EXISTED = 'modify-existed';
     protected static $defaultName = 'user:create';
 
     private $passwordEncoder;
@@ -34,6 +35,7 @@ class UserCreateCommand extends Command
         $this->setDescription('Creates a new user.');
         $this->setHelp('This command allows you to create a new user.');
         $this->addArgument('login', InputArgument::REQUIRED);
+        $this->addOption(self::OPTION_MODIFY_EXISTED, 'm', InputOption::VALUE_NONE);
     }
 
     protected function execute(InputInterface $input, OutputInterface $output)
@@ -43,28 +45,28 @@ class UserCreateCommand extends Command
 
         $login = $input->getArgument('login');
         $user = $userRepository->findOneBy(['login' => $login]);
-        if(!$user)
+        if(!$user || ($user && $input->getOption(self::OPTION_MODIFY_EXISTED)))
         {
             $password = $this->getPasswordFromInput("Please enter user password: \n", $input, $output);
             $passwordConfirm = $this->getPasswordFromInput("Confirm the password: \n", $input, $output);
 
             if($password !== $passwordConfirm)
             {
-                throw new \Exception('Passwords do not match');
+                throw new \Exception('Passwords you provided do not match');
             }
 
-            $user = new User();
+            $user = $user ?: new User();
             $user->setLogin($login);
             $user->setPassword($this->passwordEncoder->encodePassword($user, $password));
 
             $this->em->persist($user);
             $this->em->flush();
 
-            $io->success('User created successfully!');
+            $io->success('User '.($input->getOption(self::OPTION_MODIFY_EXISTED) ? 'modified' : 'created').' successfully!');
         }
         else
         {
-            $io->error("User with login $login already exists.");
+            $io->error("User with login $login already exists. Use --modify-existed option or use another login.");
         }
     }
 
