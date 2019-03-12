@@ -48,6 +48,11 @@ class City
      */
     private $population;
 
+    /**
+     * @ORM\Column(type="integer", nullable=true)
+     */
+    private $passengersCarried;
+
     public function getName(): ?string
     {
         return $this->name;
@@ -155,4 +160,25 @@ class City
 
         return $this;
     }
+
+    /**
+     * @return mixed
+     */
+    public function getPassengersCarried()
+    {
+        return $this->passengersCarried;
+    }
+
+    /**
+     * @param mixed $passengersCarried
+     *
+     * @return City
+     */
+    public function setPassengersCarried($passengersCarried)
+    {
+        $this->passengersCarried = $passengersCarried;
+
+        return $this;
+    }
+
 }
