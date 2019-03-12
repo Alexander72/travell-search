@@ -31,9 +31,9 @@ class CityRepository extends ServiceEntityRepository
      *
      * @return City[]
      */
-    public function getLargeEuropeCities()
+    public function getLargeEuropeCities(Country $country = null)
     {
-        $qb = $this->getLargeEuropeCitiesQueryBuilder();
+        $qb = $this->getLargeEuropeCitiesQueryBuilder($country);
 
         return $qb->getQuery()->getResult();
     }
@@ -41,7 +41,7 @@ class CityRepository extends ServiceEntityRepository
     /**
      * @return \Doctrine\ORM\QueryBuilder
      */
-    public function getLargeEuropeCitiesQueryBuilder(): \Doctrine\ORM\QueryBuilder
+    public function getLargeEuropeCitiesQueryBuilder(Country $country = null): \Doctrine\ORM\QueryBuilder
     {
         $qb = $this->createQueryBuilder('c');
         $qb
@@ -60,6 +60,11 @@ class CityRepository extends ServiceEntityRepository
             ->orderBy('c.name')
             ->setParameter('europe', Country::CONTINENT_EUROPE)
             ->setParameter('russia_code', 'RU');
+
+        if($country)
+        {
+            $qb->andWhere('c.country = :country')->setParameter('country', $country->getCode());
+        }
 
         return $qb;
     }
