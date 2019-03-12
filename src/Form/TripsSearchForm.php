@@ -16,6 +16,7 @@ use Symfony\Bridge\Doctrine\Form\Type\EntityType;
 use Symfony\Component\Form\Extension\Core\Type\DateType;
 use Symfony\Component\Form\Extension\Core\Type\IntegerType;
 use Symfony\Component\Form\Extension\Core\Type\SubmitType;
+use Symfony\Component\Validator\Constraints as Assert;
 
 class TripsSearchForm extends AbstractType
 {
@@ -24,9 +25,24 @@ class TripsSearchForm extends AbstractType
         $formBuilder->add('startCity', EntityType::class, $this->getCityFieldOptions());
         $formBuilder->add('finishCity', EntityType::class, $this->getCityFieldOptions());
         $formBuilder->add('startTime', DateType::class, ['widget' => 'single_text']);
-        $formBuilder->add('finishTime', DateType::class, ['widget' => 'single_text']);
-        $formBuilder->add('maxPrice', IntegerType::class);
-        $formBuilder->add('maxChanges', IntegerType::class);
+        $formBuilder->add('finishTime', DateType::class, [
+            'widget' => 'single_text',
+            'constraints' => [
+                new Assert\GreaterThan([
+                    'propertyPath' => 'parent.all[startTime].data',
+                ]),
+            ]
+        ]);
+        $formBuilder->add('maxPrice', IntegerType::class, [
+            'constraints' => [
+                new Assert\LessThan(100000),
+            ]
+        ]);
+        $formBuilder->add('maxChanges', IntegerType::class, [
+            'constraints' => [
+                new Assert\LessThan(10),
+            ]
+        ]);
         $formBuilder->add('search', SubmitType::class);
         return $formBuilder->getForm();
     }
