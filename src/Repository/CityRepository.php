@@ -17,6 +17,7 @@ use Symfony\Bridge\Doctrine\RegistryInterface;
 class CityRepository extends ServiceEntityRepository
 {
     const MIN_CITY_POPULATION_TO_USE_IT_IN_SEARCH = 400*1000;
+    const MIN_CITY_PASSENGERS_CARRIED_TO_USE_IT_IN_SEARCH = 10*1000;
 
     const RUSSIAN_DEPARTURE_CITIES = ['KGD', 'LED', 'MOW', 'ROV'];
 
@@ -52,7 +53,8 @@ class CityRepository extends ServiceEntityRepository
                     $qb->expr()->neq('c.country', ':russia_code'),
                     $qb->expr()->orX(
                         $qb->expr()->eq('c.code', 'country.capital'),
-                        $qb->expr()->gte('c.population', self::MIN_CITY_POPULATION_TO_USE_IT_IN_SEARCH)
+                        $qb->expr()->gte('c.population', self::MIN_CITY_POPULATION_TO_USE_IT_IN_SEARCH),
+                        $qb->expr()->gte('c.passengersCarried', self::MIN_CITY_PASSENGERS_CARRIED_TO_USE_IT_IN_SEARCH)
                     )
                 ),
                 $qb->expr()->in('c.code', self::RUSSIAN_DEPARTURE_CITIES)
