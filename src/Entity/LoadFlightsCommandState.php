@@ -232,15 +232,20 @@ class LoadFlightsCommandState
 
     private function updatePercent(string $originCode, string $destinationCode)
     {
-        $cities = $this->getParams()['cities'] ?? null;
-        if(!$cities || !\is_array($cities))
+        $origins = $this->getParams()['origins'] ?? null;
+        $destinations = $this->getParams()['destinations'] ?? null;
+        if(!$origins || !\is_array($origins))
         {
-            throw new \Exception('Cities parameter is not set.');
+            throw new \Exception('origins parameter is not set.');
+        }
+        if(!$destinations || !\is_array($destinations))
+        {
+            throw new \Exception('destinations parameter is not set.');
         }
 
-        $citiesCount = count($cities);
-        $total = $citiesCount * $citiesCount;
-        $passed = array_search($originCode, $cities) * $citiesCount + array_search($destinationCode, $cities) + 1;
+        $originCitiesCount = count($origins);
+        $total = $originCitiesCount * $originCitiesCount;
+        $passed = array_search($originCode, $origins) * $originCitiesCount + array_search($destinationCode, $destinations) + 1;
 
         $this->percent = \round($passed / $total * 100, 2);
     }

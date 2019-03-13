@@ -67,13 +67,13 @@ class LoadMultipleFlightsCommand extends Command
         try {
             $command = $this->getLoadFlightsCommand();
 
-            /** @var CityRepository $cityRepository */
-            $cityRepository = $this->em->getRepository(City::class);
-            $europeCities = $cityRepository->getLargeEuropeCities();
-            $state = $this->getState($europeCities, $input->getArgument('depart_month_first_day'));
+            $originCities = $this->getOriginCities();
+            $destinationCities = $this->getDestinationCities();
 
-            $originCities = new CitiesGenerator($europeCities, $state->getOrigin());
-            $destinationCities = new CitiesGenerator($europeCities, $state->getDestination());
+            $state = $this->getState($originCities, $destinationCities, $input->getArgument('depart_month_first_day'));
+
+            $originCities = new CitiesGenerator($originCities, $state->getOrigin());
+            $destinationCities = new CitiesGenerator($destinationCities, $state->getDestination());
 
             foreach($originCities->get() as $origin)
             {
@@ -113,7 +113,21 @@ class LoadMultipleFlightsCommand extends Command
         }
     }
 
-    private function getState(array $cities, string $departMonthFirstDay): LoadFlightsCommandState
+    private function getOriginCities(): array
+    {
+        /** @var CityRepository $cityRepository */
+        $cityRepository = $this->em->getRepository(City::class);
+        return $cityRepository->getAllEuropeCities();
+    }
+
+    private function getDestinationCities(): array
+    {
+        /** @var CityRepository $cityRepository */
+        $cityRepository = $this->em->getRepository(City::class);
+        return $cityRepository->getEuropeLargestAirHubs();
+    }
+
+    private function getState(array $originCities, array $destinationCities, string $departMonthFirstDay): LoadFlightsCommandState
     {
         $departMonthFirstDay = DateTime::createFromFormat('Y-m-d', $departMonthFirstDay);
         /** @var LoadFlightsCommandStateRepository $loadStateRepository */
@@ -123,7 +137,8 @@ class LoadMultipleFlightsCommand extends Command
         {
             $state = new LoadFlightsCommandState();
             $state->setParams([
-                'cities' => array_map(function($city){return $city->getCode();}, $cities),
+                'origins' => array_map(function($city){return $city->getCode();}, $originCities),
+                'destinations' => array_map(function($city){return $city->getCode();}, $destinationCities),
             ]);
             $state->setDepartMonthFirstDay($departMonthFirstDay);
             $this->em->persist($state);
