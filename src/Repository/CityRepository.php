@@ -6,6 +6,7 @@ use App\Entity\City;
 use App\Entity\Country;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\ORM\Query\Expr\Join;
+use Doctrine\ORM\QueryBuilder;
 use Symfony\Bridge\Doctrine\RegistryInterface;
 
 /**
@@ -40,32 +41,43 @@ class CityRepository extends ServiceEntityRepository
     }
 
     /**
-     * @return \Doctrine\ORM\QueryBuilder
+     * @param Country|null $country
+     *
+     * @return QueryBuilder
      */
-    public function getLargeEuropeCitiesQueryBuilder(Country $country = null): \Doctrine\ORM\QueryBuilder
+    public function getLargeEuropeCitiesQueryBuilder(Country $country = null): QueryBuilder
     {
-        $qb = $this->createQueryBuilder('c');
+        $qb = $this->getEuropeCitiesQueryBuilder($country);
         $qb
-            ->leftJoin('c.country', 'country')
-            ->where('country.continent = :europe')
             ->andWhere($qb->expr()->orX(
                 $qb->expr()->andX(
-                    $qb->expr()->neq('c.country', ':russia_code'),
+                    $qb->expr()->neq('city.country', ':russia_code'),
                     $qb->expr()->orX(
-                        $qb->expr()->eq('c.code', 'country.capital'),
-                        $qb->expr()->gte('c.population', self::MIN_CITY_POPULATION_TO_USE_IT_IN_SEARCH),
-                        $qb->expr()->gte('c.passengersCarried', self::MIN_CITY_PASSENGERS_CARRIED_TO_USE_IT_IN_SEARCH)
+                        $qb->expr()->eq('city.code', 'country.capital'),
+                        $qb->expr()->gte('city.population', self::MIN_CITY_POPULATION_TO_USE_IT_IN_SEARCH),
+                        $qb->expr()->gte('city.passengersCarried', self::MIN_CITY_PASSENGERS_CARRIED_TO_USE_IT_IN_SEARCH)
                     )
                 ),
-                $qb->expr()->in('c.code', self::RUSSIAN_DEPARTURE_CITIES)
+                $qb->expr()->in('city.code', self::RUSSIAN_DEPARTURE_CITIES)
             ))
-            ->orderBy('c.name')
-            ->setParameter('europe', Country::CONTINENT_EUROPE)
             ->setParameter('russia_code', 'RU');
+
+
+        return $qb;
+    }
+
+    public function getEuropeCitiesQueryBuilder(Country $country = null): QueryBuilder
+    {
+        $qb = $this->createQueryBuilder('city');
+        $qb
+            ->leftJoin('city.country', 'country')
+            ->where('country.continent = :europe')
+            ->setParameter('europe', Country::CONTINENT_EUROPE)
+            ->orderBy('city.name');
 
         if($country)
         {
-            $qb->andWhere('c.country = :country')->setParameter('country', $country->getCode());
+            $qb->andWhere('city.country = :country')->setParameter('country', $country->getCode());
         }
 
         return $qb;
