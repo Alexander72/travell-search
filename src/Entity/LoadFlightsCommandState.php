@@ -225,6 +225,7 @@ class LoadFlightsCommandState
      */
     public function finish()
     {
+        $this->percent = 100;
         $this->setUpdated(new DateTime());
         $this->setStatus(self::STATUS_FINISHED);
     }
