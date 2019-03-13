@@ -21,6 +21,7 @@ class CityRepository extends ServiceEntityRepository
     const MIN_CITY_PASSENGERS_CARRIED_TO_USE_IT_IN_SEARCH = 10*1000;
 
     const RUSSIAN_DEPARTURE_CITIES = ['KGD', 'LED', 'MOW', 'ROV'];
+    const LARGEST_EUROPE_AIR_HUBS = ['AMS', 'BCN', 'LON', 'MOW', 'PAR', 'RIX', 'ROM', 'FFT'];
 
     public function __construct(RegistryInterface $registry)
     {
@@ -29,13 +30,27 @@ class CityRepository extends ServiceEntityRepository
 
     /**
      * Return cities that worst to search routes between.
-     * Returned cities are european country capitals or russian exclusive cities or european large cities
+     * Returned cities are european country capitals or russian exclusive cities or european large cities or large air hubs
      *
      * @return City[]
      */
     public function getLargeEuropeCities(Country $country = null)
     {
         $qb = $this->getLargeEuropeCitiesQueryBuilder($country);
+
+        return $qb->getQuery()->getResult();
+    }
+
+    public function getAllEuropeCities()
+    {
+        $qb = $this->getEuropeCitiesQueryBuilder();
+
+        return $qb->getQuery()->getResult();
+    }
+
+    public function getEuropeLargestAirHubs()
+    {
+        $qb = $this->getEuropeLargestAirHubsQueryBuilder();
 
         return $qb->getQuery()->getResult();
     }
@@ -79,6 +94,20 @@ class CityRepository extends ServiceEntityRepository
         {
             $qb->andWhere('city.country = :country')->setParameter('country', $country->getCode());
         }
+
+        return $qb;
+    }
+
+    public function getEuropeLargestAirHubsQueryBuilder(): QueryBuilder
+    {
+        $qb = $this->createQueryBuilder('city');
+        $qb
+            ->leftJoin('city.country', 'country')
+            ->where('country.continent = :europe')
+            ->andWhere('city.code IN (:larges_air_hubs)')
+            ->setParameter('europe', Country::CONTINENT_EUROPE)
+            ->setParameter('larges_air_hubs', self::LARGEST_EUROPE_AIR_HUBS)
+            ->orderBy('city.name');
 
         return $qb;
     }
