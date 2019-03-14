@@ -117,14 +117,12 @@ class LoadMultipleFlightsCommand extends Command
     {
         /** @var CityRepository $cityRepository */
         $cityRepository = $this->em->getRepository(City::class);
-        return $cityRepository->getAllEuropeCities();
+        return $cityRepository->getEuropeCitiesForSearch();
     }
 
     private function getDestinationCities(): array
     {
-        /** @var CityRepository $cityRepository */
-        $cityRepository = $this->em->getRepository(City::class);
-        return $cityRepository->getEuropeLargestAirHubs();
+        return $this->getOriginCities();
     }
 
     private function getState(array $originCities, array $destinationCities, string $departMonthFirstDay): LoadFlightsCommandState

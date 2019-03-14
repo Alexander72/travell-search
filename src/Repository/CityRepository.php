@@ -21,7 +21,24 @@ class CityRepository extends ServiceEntityRepository
     const MIN_CITY_PASSENGERS_CARRIED_TO_USE_IT_IN_SEARCH = 10*1000;
 
     const RUSSIAN_DEPARTURE_CITIES = ['KGD', 'LED', 'MOW', 'ROV'];
-    const LARGEST_EUROPE_AIR_HUBS = ['AMS', 'BCN', 'LON', 'MOW', 'PAR', 'RIX', 'ROM', 'FFT'];
+    const LARGEST_EUROPE_AIR_HUBS = ['AMS', 'BCN', 'LON', 'MOW', 'PAR', 'RIX', 'ROM', 'FFT', 'BER'];
+    /**
+     * Список городов, из которых что-то летает в крупные хабы LARGEST_EUROPE_AIR_HUBS
+     * Проверено для всех городов европы. Поиск производился в марте на июнь 2019 года
+     */
+    const EUROPE_CITIES_WORTH_TO_USE_IN_SEARCH = [
+        'HEL', 'BER', 'MSQ', 'TBS', 'BCN', 'MIL', 'PAR', 'RIX', 'PRG', 'VNO', 'ATH', 'IST', 'WAW', 'AMS', 'MAD', 'LON',
+        'ROM', 'LIS', 'VCE', 'MUC', 'BUD', 'TLL', 'EVN', 'SOF', 'NCE', 'VIE', 'KUT', 'AGP', 'BRU', 'OPO', 'DUB', 'TCI',
+        'BAK', 'PMI', 'BUH', 'CTA', 'VAR', 'BOJ', 'IBZ', 'TIV', 'PMO', 'AYT', 'BUS', 'NAP', 'FRA', 'LCA', 'ALC', 'ZRH',
+        'LYS', 'GDN', 'CPH', 'EDI', 'HAM', 'DUS', 'STO', 'OSL', 'BLQ', 'VLC', 'ZAG', 'GVA', 'DRS', 'SKG', 'HAJ', 'SPU',
+        'HER', 'STR', 'MRS', 'RHO', 'GOA', 'CFU', 'PSA', 'GZP', 'BEG', 'BTS', 'VRN', 'MLA', 'LJU', 'BRI', 'REK', 'ANK',
+        'BOD', 'OLB', 'PUY', 'RMI', 'CGN', 'LPA', 'GRO', 'CAG', 'FLR', 'IZM', 'SVQ', 'KRK', 'FNC', 'DLM', 'MAN', 'PFO',
+        'JTR', 'DBV', 'TRN', 'TGD', 'TLS', 'LEJ', 'TIA', 'SXB', 'ADA', 'SZG', 'INN', 'FKB', 'SKP', 'BIO', 'CHQ', 'KGS',
+        'SUF', 'BJV', 'ECN', 'DEB', 'LWN', 'KVD', 'FAO', 'TRS', 'EIN', 'KLV', 'FMM', 'OST', 'MJT', 'PLQ', 'PSR', 'SCV',
+        'LEI', 'AJA', 'REU', 'TKU', 'JMK', 'RJK', 'NUE', 'WRO', 'OVD', 'ZTH', 'BFS', 'GLA', 'FSC', 'BRQ', 'EAP', 'ZAD',
+        'RTM', 'SCQ', 'PGF', 'LPL', 'LUX', 'POZ', 'KVA', 'KUN', 'AJI', 'ACE', 'TAY', 'LIL', 'ANR', 'TRD', 'DOL', 'ASR',
+        'NAV', 'BZG', 'AHO', 'GRZ', 'UME', 'DTM', 'VGO', 'BZR', 'LLK'
+    ];
 
     public function __construct(RegistryInterface $registry)
     {
@@ -85,7 +102,7 @@ class CityRepository extends ServiceEntityRepository
     {
         $qb = $this->createQueryBuilder('city');
         $qb
-            ->leftJoin('city.country', 'country')
+            ->leftJoin(Country::class, 'country', Join::WITH, 'country.code = city.country')
             ->where('country.continent = :europe')
             ->setParameter('europe', Country::CONTINENT_EUROPE)
             ->orderBy('city.name');
@@ -110,5 +127,30 @@ class CityRepository extends ServiceEntityRepository
             ->orderBy('city.name');
 
         return $qb;
+    }
+
+    public function getEuropeCitiesForSearch(): array
+    {
+        $qb = $this->getEuropeCitiesForSearchQueryBuilder();
+        return $qb->getQuery()->getResult();
+    }
+
+    public function getEuropeCitiesForSearchQueryBuilder(): QueryBuilder
+    {
+        $cities = $this->getEuropeCityCodesWorthToUseInSearch();
+
+        $qb = $this->getEuropeCitiesQueryBuilder();
+        $qb->andWhere('city.code IN (:cities)');
+        $qb->setParameter('cities', $cities);
+
+        return $qb;
+    }
+
+    /**
+     * @return array
+     */
+    private function getEuropeCityCodesWorthToUseInSearch(): array
+    {
+        return \array_merge(self::RUSSIAN_DEPARTURE_CITIES, self::LARGEST_EUROPE_AIR_HUBS, self::EUROPE_CITIES_WORTH_TO_USE_IN_SEARCH);
     }
 }
