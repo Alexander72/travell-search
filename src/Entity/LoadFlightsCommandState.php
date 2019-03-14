@@ -69,8 +69,14 @@ class LoadFlightsCommandState
 
     /**
      * @ORM\Column(type="integer")
+     * @var int
      */
     private $memoryUsage;
+
+    /**
+     * @ORM\Column(type="datetime")
+     */
+    private $startedAt;
 
     public function getId(): ?int
     {
@@ -228,6 +234,24 @@ class LoadFlightsCommandState
         $this->memoryUsage = $memoryUsage;
 
         return $this;
+    }
+
+    public function getStartedAt(): ?\DateTimeInterface
+    {
+        return $this->startedAt;
+    }
+
+    public function setStartedAt(\DateTimeInterface $startedAt): self
+    {
+        $this->startedAt = $startedAt;
+
+        return $this;
+    }
+
+    public function __construct()
+    {
+        $this->setStartedAt(new DateTime());
+        $this->setMemoryUsage(\memory_get_usage());
     }
 
     /**
