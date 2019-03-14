@@ -67,6 +67,11 @@ class LoadFlightsCommandState
      */
     private $percent;
 
+    /**
+     * @ORM\Column(type="integer")
+     */
+    private $memoryUsage;
+
     public function getId(): ?int
     {
         return $this->id;
@@ -206,6 +211,26 @@ class LoadFlightsCommandState
     }
 
     /**
+     * @return mixed
+     */
+    public function getMemoryUsage()
+    {
+        return $this->memoryUsage;
+    }
+
+    /**
+     * @param mixed $memoryUsage
+     *
+     * @return LoadFlightsCommandState
+     */
+    public function setMemoryUsage(int $memoryUsage)
+    {
+        $this->memoryUsage = $memoryUsage;
+
+        return $this;
+    }
+
+    /**
      * @param \App\Entity\City $origin
      * @param \App\Entity\City $destination
      *
@@ -213,6 +238,7 @@ class LoadFlightsCommandState
      */
     public function update(City $origin, City $destination)
     {
+        $this->setMemoryUsage(\memory_get_usage());
         $this->setStatus(LoadFlightsCommandState::STATUS_LOADING);
         $this->setOrigin($origin);
         $this->setDestination($destination);
