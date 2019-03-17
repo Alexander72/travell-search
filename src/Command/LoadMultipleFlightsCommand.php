@@ -168,10 +168,20 @@ class LoadMultipleFlightsCommand extends Command
     /**
      * @param InputInterface $input
      *
-     * @return bool|DateTime
+     * @return DateTime|null
+     * @throws Exception
      */
     private function getDepartureMonthFirstDay(InputInterface $input): ?DateTime
     {
-        return $input->getArgument('depart_month_first_day') ? DateTime::createFromFormat('Y-m-d', $input->getArgument('depart_month_first_day')): null;
+        $departureMonthFirstDay = $input->getArgument('depart_month_first_day');
+
+        $departureMonthFirstDay = $departureMonthFirstDay ? DateTime::createFromFormat('Y-m-d', $departureMonthFirstDay): null;
+
+        if($departureMonthFirstDay && $departureMonthFirstDay->format('d') != '01')
+        {
+            throw new Exception('depart_month_first_day argument is not first day: '.$departureMonthFirstDay->format('Y-m-d'));
+        }
+
+        return $departureMonthFirstDay;
     }
 }
