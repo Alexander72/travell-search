@@ -37,4 +37,33 @@ class LoadFlightsCommandStateRepository extends ServiceEntityRepository
         $qb->setMaxResults(1);
         return $qb->getQuery()->getOneOrNullResult();
     }
+
+    /**
+     * @param bool           $isFinished
+     * @param \DateTime|null $departMonthFirstDay
+     *
+     * @return LoadFlightsCommandState|null
+     * @throws \Doctrine\ORM\NonUniqueResultException
+     */
+    public function getLastState(bool $isFinished, ?\DateTime $departMonthFirstDay = null): ?LoadFlightsCommandState
+    {
+        $statusCondition = $isFinished ? 'ls.status = :finished_status' : 'ls.status != :finished_status';
+
+        $qb = $this->createQueryBuilder('ls');
+        $qb->where("$statusCondition AND ls.type = :load_flights_type");
+        $qb->setParameters([
+            'finished_status' => LoadFlightsCommandState::STATUS_FINISHED,
+            'load_flights_type' => LoadFlightsCommandState::TYPE,
+        ]);
+        $qb->orderBy('ls.updated', 'DESC');
+        $qb->setMaxResults(1);
+
+        if($departMonthFirstDay)
+        {
+            $qb->andWhere('ls.departMonthFirstDay = :departMonthFirstDay');
+            $qb->setParameter('departMonthFirstDay', $departMonthFirstDay->format('Y-m-d'));
+        }
+
+        return $qb->getQuery()->getOneOrNullResult();
+    }
 }

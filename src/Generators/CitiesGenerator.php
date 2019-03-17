@@ -29,7 +29,7 @@ class CitiesGenerator
         $this->iterator = $this->createForwardedCitiesIteratorByState($cities, $currentCity);
     }
 
-    public function get(): \Generator
+    public function yield(): \Generator
     {
         while($this->iterator->current())
         {

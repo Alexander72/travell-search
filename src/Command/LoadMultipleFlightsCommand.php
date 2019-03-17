@@ -2,11 +2,13 @@
 
 namespace App\Command;
 
+use App\Builders\CitiesGeneratorBuilder;
 use App\Entity\City;
 use App\Entity\LoadFlightsCommandState;
 use App\Generators\CitiesGenerator;
 use App\Repository\CityRepository;
 use App\Repository\LoadFlightsCommandStateRepository;
+use App\Builders\FlightLoadStateBuilder;
 use ArrayIterator;
 use DateTime;
 use Doctrine\ORM\EntityManagerInterface;
@@ -36,21 +38,35 @@ class LoadMultipleFlightsCommand extends Command
      */
     private $lockFactory;
 
+    /**
+     * @var \App\Builders\FlightLoadStateBuilder
+     */
+    private $stateBuilder;
+
+    /**
+     * @var CitiesGeneratorBuilder
+     */
+    private $citiesGeneratorBuilder;
+
     protected static $defaultName = 'LoadMultipleFlights';
 
     public function __construct(
         EntityManagerInterface $entityManager,
-        Factory $lockFactory
+        Factory $lockFactory,
+        FlightLoadStateBuilder $stateService,
+        CitiesGeneratorBuilder $citiesGeneratorBuilder
     ) {
         parent::__construct();
         $this->em = $entityManager;
         $this->lockFactory = $lockFactory;
+        $this->stateBuilder = $stateService;
+        $this->citiesGeneratorBuilder = $citiesGeneratorBuilder;
     }
 
     protected function configure()
     {
         $this->setDescription('Loads multiple flights using LoadFlight command');
-        $this->addArgument('depart_month_first_day', InputArgument::REQUIRED);
+        $this->addArgument('depart_month_first_day', InputArgument::OPTIONAL);
     }
 
     protected function execute(InputInterface $input, OutputInterface $output)
@@ -67,17 +83,24 @@ class LoadMultipleFlightsCommand extends Command
         try {
             $command = $this->getLoadFlightsCommand();
 
-            $originCities = $this->getOriginCities();
-            $destinationCities = $this->getDestinationCities();
+            $this->stateBuilder->setDefaultOriginCities($this->getOriginCities());
+            $this->stateBuilder->setDefaultDestinationCities($this->getDestinationCities());
+            $this->stateBuilder->setDepartureMonthFirstDay($this->getDepartureMonthFirstDay($input));
+            $state = $this->stateBuilder->build();
 
-            $state = $this->getState($originCities, $destinationCities, $input->getArgument('depart_month_first_day'));
+            $this->citiesGeneratorBuilder->setState($state);
+            $originCities = $this->citiesGeneratorBuilder->buildOriginsGenerator();
+            $destinationCities = $this->citiesGeneratorBuilder->buildDestinationsGenerator();
 
-            $originCities = new CitiesGenerator($originCities, $state->getOrigin());
-            $destinationCities = new CitiesGenerator($destinationCities, $state->getDestination());
+            //$state->setOrigins($originCities);
+            //$state->setDestinations($destinationCities);
 
-            foreach($originCities->get() as $origin)
+            //$originCities = new CitiesGenerator($originCities, $state->getOrigin());
+            //$destinationCities = new CitiesGenerator($destinationCities, $state->getDestination());
+
+            foreach($originCities->yield() as $origin)
             {
-                foreach($destinationCities->get() as $destination)
+                foreach($destinationCities->yield() as $destination)
                 {
                     if($origin->getCode() == $destination->getCode())
                     {
@@ -88,7 +111,7 @@ class LoadMultipleFlightsCommand extends Command
 
                     try
                     {
-                        $loadFlightsCommandArguments = $this->getLoadFlightsCommandArguments($input, $origin, $destination);
+                        $loadFlightsCommandArguments = $this->getLoadFlightsCommandArguments($state);
                         $command->run($loadFlightsCommandArguments, $output);
                     } catch(\Exception $e) {
                         $io->warning($e->getMessage());
@@ -125,7 +148,7 @@ class LoadMultipleFlightsCommand extends Command
         return $this->getOriginCities();
     }
 
-    private function getState(array $originCities, array $destinationCities, string $departMonthFirstDay): LoadFlightsCommandState
+    private function loadState(array $originCities, array $destinationCities, string $departMonthFirstDay): LoadFlightsCommandState
     {
         $departMonthFirstDay = DateTime::createFromFormat('Y-m-d', $departMonthFirstDay);
         /** @var LoadFlightsCommandStateRepository $loadStateRepository */
@@ -154,23 +177,31 @@ class LoadMultipleFlightsCommand extends Command
     }
 
     /**
-     * @param InputInterface $input
-     * @param City           $origin
-     * @param City           $destination
+     * @param LoadFlightsCommandState $state
      *
      * @return ArrayInput
      */
-    private function getLoadFlightsCommandArguments(InputInterface $input, City $origin, City $destination): ArrayInput
+    private function getLoadFlightsCommandArguments(LoadFlightsCommandState $state): ArrayInput
     {
         $arguments = [
             'command'        => LoadFlightsCommand::getDefaultName(),
-            '--origin'       => $origin->getCode(),
-            '--destination'  => $destination->getCode(),
-            '--depart_month' => $input->getArgument('depart_month_first_day'),
+            '--origin'       => $state->getOrigin()->getCode(),
+            '--destination'  => $state->getDestination()->getCode(),
+            '--depart_month' => $state->getDepartMonthFirstDay()->format('Y-m-d'),
         ];
 
         $greetInput = new ArrayInput($arguments);
 
         return $greetInput;
+    }
+
+    /**
+     * @param InputInterface $input
+     *
+     * @return bool|DateTime
+     */
+    private function getDepartureMonthFirstDay(InputInterface $input): ?DateTime
+    {
+        return $input->getArgument('depart_month_first_day') ? DateTime::createFromFormat('Y-m-d', $input->getArgument('depart_month_first_day')): null;
     }
 }

@@ -17,6 +17,8 @@ class LoadFlightsCommandState
     const STATUS_FINISHED = 'finished';
 
     const TYPE = 'LoadMultipleFlightsCommand';
+    const DESTINATIONS_PARAM = 'destinations';
+    const ORIGINS_PARAM = 'origins';
 
     /**
      * @ORM\Id()
@@ -156,6 +158,63 @@ class LoadFlightsCommandState
     }
 
     /**
+     * @param string $name
+     *
+     * @return mixed
+     */
+    public function getParam(string $name)
+    {
+        return $this->params[$name] ?? null;
+    }
+
+    /**
+     * @param string $name
+     * @param        $param
+     *
+     * @return $this
+     */
+    public function setParam(string $name, $param)
+    {
+        $this->params[$name] = $param;
+
+        return $this;
+    }
+
+    /**
+     * @param array $originCities
+     *
+     * @return $this
+     */
+    public function setOrigins(array $originCities)
+    {
+        $this->setParam(self::ORIGINS_PARAM, array_map(function($city){return $city->getCode();}, $originCities));
+
+        return $this;
+    }
+
+    /**
+     * @param array $destinationCities
+     *
+     * @return $this
+     */
+    public function setDestinations(array $destinationCities)
+    {
+        $this->setParam(self::DESTINATIONS_PARAM, array_map(function($city){return $city->getCode();}, $destinationCities));
+
+        return $this;
+    }
+
+    public function getOrigins()
+    {
+        return $this->getParam(self::ORIGINS_PARAM) ?? [];
+    }
+
+    public function getDestinations()
+    {
+        return $this->getParam(self::DESTINATIONS_PARAM) ?? [];
+    }
+
+    /**
      * @param mixed $params
      *
      * @return LoadFlightsCommandState
@@ -188,7 +247,7 @@ class LoadFlightsCommandState
     }
 
     /**
-     * @return mixed
+     * @return DateTime
      */
     public function getDepartMonthFirstDay()
     {
@@ -282,8 +341,8 @@ class LoadFlightsCommandState
 
     private function updatePercent(string $originCode, string $destinationCode)
     {
-        $origins = $this->getParams()['origins'] ?? null;
-        $destinations = $this->getParams()['destinations'] ?? null;
+        $origins = $this->getOrigins();
+        $destinations = $this->getDestinations();
         if(!$origins || !\is_array($origins))
         {
             throw new \Exception('origins parameter is not set.');
