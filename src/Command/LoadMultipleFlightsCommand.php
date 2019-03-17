@@ -5,11 +5,8 @@ namespace App\Command;
 use App\Builders\CitiesGeneratorBuilder;
 use App\Entity\City;
 use App\Entity\LoadFlightsCommandState;
-use App\Generators\CitiesGenerator;
 use App\Repository\CityRepository;
-use App\Repository\LoadFlightsCommandStateRepository;
 use App\Builders\FlightLoadStateBuilder;
-use ArrayIterator;
 use DateTime;
 use Doctrine\ORM\EntityManagerInterface;
 use Exception;
@@ -17,7 +14,6 @@ use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\ArrayInput;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
-use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Style\SymfonyStyle;
 use Symfony\Component\Lock\Factory;
@@ -92,12 +88,6 @@ class LoadMultipleFlightsCommand extends Command
             $originCities = $this->citiesGeneratorBuilder->buildOriginsGenerator();
             $destinationCities = $this->citiesGeneratorBuilder->buildDestinationsGenerator();
 
-            //$state->setOrigins($originCities);
-            //$state->setDestinations($destinationCities);
-
-            //$originCities = new CitiesGenerator($originCities, $state->getOrigin());
-            //$destinationCities = new CitiesGenerator($destinationCities, $state->getDestination());
-
             foreach($originCities->yield() as $origin)
             {
                 foreach($destinationCities->yield() as $destination)
@@ -146,26 +136,6 @@ class LoadMultipleFlightsCommand extends Command
     private function getDestinationCities(): array
     {
         return $this->getOriginCities();
-    }
-
-    private function loadState(array $originCities, array $destinationCities, string $departMonthFirstDay): LoadFlightsCommandState
-    {
-        $departMonthFirstDay = DateTime::createFromFormat('Y-m-d', $departMonthFirstDay);
-        /** @var LoadFlightsCommandStateRepository $loadStateRepository */
-        $loadStateRepository = $this->em->getRepository(LoadFlightsCommandState::class);
-        $state = $loadStateRepository->getLoadMultipleFlightsCommandState($departMonthFirstDay);
-        if(!$state)
-        {
-            $state = new LoadFlightsCommandState();
-            $state->setParams([
-                'origins' => array_map(function($city){return $city->getCode();}, $originCities),
-                'destinations' => array_map(function($city){return $city->getCode();}, $destinationCities),
-            ]);
-            $state->setDepartMonthFirstDay($departMonthFirstDay);
-            $this->em->persist($state);
-        }
-
-        return $state;
     }
 
     /**

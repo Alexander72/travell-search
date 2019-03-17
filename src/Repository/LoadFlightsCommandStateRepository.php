@@ -20,25 +20,6 @@ class LoadFlightsCommandStateRepository extends ServiceEntityRepository
     }
 
     /**
-     * @param \DateTime $departMonthFirstDay
-     *
-     * @return LoadFlightsCommandState|null
-     * @throws \Doctrine\ORM\NonUniqueResultException
-     */
-    public function getLoadMultipleFlightsCommandState(\DateTime $departMonthFirstDay): ?LoadFlightsCommandState
-    {
-        $qb = $this->createQueryBuilder('ls');
-        $qb->where('ls.status != :finished_status AND ls.type = :load_flights_type AND ls.departMonthFirstDay = :departMonthFirstDay');
-        $qb->setParameters([
-            'finished_status' => LoadFlightsCommandState::STATUS_FINISHED,
-            'load_flights_type' => LoadFlightsCommandState::TYPE,
-            'departMonthFirstDay' => $departMonthFirstDay->format('Y-m-d'),
-        ]);
-        $qb->setMaxResults(1);
-        return $qb->getQuery()->getOneOrNullResult();
-    }
-
-    /**
      * @param bool           $isFinished
      * @param \DateTime|null $departMonthFirstDay
      *
