@@ -5,9 +5,11 @@
  * (and its CSS file) in your base layout (base.html.twig).
  */
 
+require('./menu.js');
+
 require('../css/global.scss');
 // any CSS you require will output into a single css file (app.css in this case)
-require('../css/app.css');
+require('../css/menu.css');
 
 // Need jQuery? Install it with "yarn add jquery", then uncomment to require it.
 // const $ = require('jquery');
