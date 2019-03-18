@@ -17,6 +17,8 @@ class LoadFlightsCommandState
     const STATUS_FINISHED = 'finished';
 
     const TYPE = 'LoadMultipleFlightsCommand';
+    const DESTINATIONS_PARAM = 'destinations';
+    const ORIGINS_PARAM = 'origins';
 
     /**
      * @ORM\Id()
@@ -66,6 +68,17 @@ class LoadFlightsCommandState
      * @ORM\Column(type="float")
      */
     private $percent;
+
+    /**
+     * @ORM\Column(type="integer")
+     * @var int
+     */
+    private $memoryUsage;
+
+    /**
+     * @ORM\Column(type="datetime")
+     */
+    private $startedAt;
 
     public function getId(): ?int
     {
@@ -145,6 +158,63 @@ class LoadFlightsCommandState
     }
 
     /**
+     * @param string $name
+     *
+     * @return mixed
+     */
+    public function getParam(string $name)
+    {
+        return $this->params[$name] ?? null;
+    }
+
+    /**
+     * @param string $name
+     * @param        $param
+     *
+     * @return $this
+     */
+    public function setParam(string $name, $param)
+    {
+        $this->params[$name] = $param;
+
+        return $this;
+    }
+
+    /**
+     * @param array $originCities
+     *
+     * @return $this
+     */
+    public function setOrigins(array $originCities)
+    {
+        $this->setParam(self::ORIGINS_PARAM, array_map(function($city){return $city->getCode();}, $originCities));
+
+        return $this;
+    }
+
+    /**
+     * @param array $destinationCities
+     *
+     * @return $this
+     */
+    public function setDestinations(array $destinationCities)
+    {
+        $this->setParam(self::DESTINATIONS_PARAM, array_map(function($city){return $city->getCode();}, $destinationCities));
+
+        return $this;
+    }
+
+    public function getOrigins()
+    {
+        return $this->getParam(self::ORIGINS_PARAM) ?? [];
+    }
+
+    public function getDestinations()
+    {
+        return $this->getParam(self::DESTINATIONS_PARAM) ?? [];
+    }
+
+    /**
      * @param mixed $params
      *
      * @return LoadFlightsCommandState
@@ -177,7 +247,7 @@ class LoadFlightsCommandState
     }
 
     /**
-     * @return mixed
+     * @return DateTime
      */
     public function getDepartMonthFirstDay()
     {
@@ -206,6 +276,44 @@ class LoadFlightsCommandState
     }
 
     /**
+     * @return mixed
+     */
+    public function getMemoryUsage()
+    {
+        return $this->memoryUsage;
+    }
+
+    /**
+     * @param mixed $memoryUsage
+     *
+     * @return LoadFlightsCommandState
+     */
+    public function setMemoryUsage(int $memoryUsage)
+    {
+        $this->memoryUsage = $memoryUsage;
+
+        return $this;
+    }
+
+    public function getStartedAt(): ?\DateTimeInterface
+    {
+        return $this->startedAt;
+    }
+
+    public function setStartedAt(\DateTimeInterface $startedAt): self
+    {
+        $this->startedAt = $startedAt;
+
+        return $this;
+    }
+
+    public function __construct()
+    {
+        $this->setStartedAt(new DateTime());
+        $this->setMemoryUsage(\memory_get_usage());
+    }
+
+    /**
      * @param \App\Entity\City $origin
      * @param \App\Entity\City $destination
      *
@@ -213,6 +321,7 @@ class LoadFlightsCommandState
      */
     public function update(City $origin, City $destination)
     {
+        $this->setMemoryUsage(\memory_get_usage());
         $this->setStatus(LoadFlightsCommandState::STATUS_LOADING);
         $this->setOrigin($origin);
         $this->setDestination($destination);
@@ -225,21 +334,27 @@ class LoadFlightsCommandState
      */
     public function finish()
     {
+        $this->percent = 100;
         $this->setUpdated(new DateTime());
         $this->setStatus(self::STATUS_FINISHED);
     }
 
     private function updatePercent(string $originCode, string $destinationCode)
     {
-        $cities = $this->getParams()['cities'] ?? null;
-        if(!$cities || !\is_array($cities))
+        $origins = $this->getOrigins();
+        $destinations = $this->getDestinations();
+        if(!$origins || !\is_array($origins))
         {
-            throw new \Exception('Cities parameter is not set.');
+            throw new \Exception('origins parameter is not set.');
+        }
+        if(!$destinations || !\is_array($destinations))
+        {
+            throw new \Exception('destinations parameter is not set.');
         }
 
-        $citiesCount = count($cities);
-        $total = $citiesCount * $citiesCount;
-        $passed = array_search($originCode, $cities) * $citiesCount + array_search($destinationCode, $cities) + 1;
+        $originCitiesCount = count($origins);
+        $total = $originCitiesCount * $originCitiesCount;
+        $passed = array_search($originCode, $origins) * $originCitiesCount + array_search($destinationCode, $destinations) + 1;
 
         $this->percent = \round($passed / $total * 100, 2);
     }

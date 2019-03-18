@@ -47,7 +47,6 @@ class LoadFlightsCommand extends Command
         $io = new SymfonyStyle($input, $output);
 
         $cityRepository = $this->em->getRepository(City::class);
-        $cityRepository->findAll();
 
         $client = new \GuzzleHttp\Client();
         $options = ['token' => $this->apiToken];
