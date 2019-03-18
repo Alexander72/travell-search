@@ -42,7 +42,7 @@ class BuildTripController extends AbstractController
     }
 
     /**
-     * @Route("/", name="index")
+     * @Route("/find-trips", name="searchForm")
      */
     public function index(Request $request)
     {

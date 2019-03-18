@@ -15,14 +15,10 @@
 
         <!-- Sidebar -->
         <div class="bg-light border-right" id="sidebar-wrapper">
-            <div class="sidebar-heading">Start Bootstrap</div>
+            <div class="sidebar-heading"><a href="/">Travel Search</a></div>
             <div class="list-group list-group-flush">
-                <a href="#" class="active list-group-item list-group-item-action">Dashboard</a>
-                <a href="#" class="list-group-item list-group-item-action bg-light">Shortcuts</a>
-                <a href="#" class="list-group-item list-group-item-action bg-light">Overview</a>
-                <a href="#" class="list-group-item list-group-item-action bg-light">Events</a>
-                <a href="#" class="list-group-item list-group-item-action bg-light">Profile</a>
-                <a href="#" class="list-group-item list-group-item-action bg-light">Status</a>
+                <a href="{{ path('searchForm') }}" class="{{ app.request.get('_route') == 'searchForm' ? 'active ' : 'bg-light' }} list-group-item list-group-item-action">Search trip</a>
+                <a href="{{ path('statistic') }}" class="{{ app.request.get('_route') == 'statistic' ? 'active ' : 'bg-light' }} list-group-item list-group-item-action">Loading process</a>
             </div>
         </div>
         <!-- /#sidebar-wrapper -->
@@ -37,6 +33,7 @@
                     <span class="navbar-toggler-icon"></span>
                 </button>
 
+                {#
                 <div class="collapse navbar-collapse" id="navbarSupportedContent">
                     <ul class="navbar-nav ml-auto mt-2 mt-lg-0">
                         <li class="nav-item active">
@@ -57,7 +54,7 @@
                             </div>
                         </li>
                     </ul>
-                </div>
+                </div>#}
             </nav>
 
             <div class="container-fluid">
