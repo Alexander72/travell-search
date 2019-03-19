@@ -9,6 +9,7 @@
 namespace App\Controller;
 
 use App\Repository\LoadFlightsCommandStateRepository;
+use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 
@@ -28,7 +29,36 @@ class StatisticController extends AbstractController
      */
     public function index()
     {
+        $data = $this->getStatData();
+
+        return $this->render('admin/statistic.twig', $data);
+    }
+
+    /**
+     * @Route("/admin/statistic/api", name="statisticApi")
+     */
+    public function statisticApiData()
+    {
+        $data = $this->getStatData();
+
+        return new JsonResponse($data);
+    }
+
+    /**
+     * @return array
+     * @throws \Doctrine\ORM\NonUniqueResultException
+     */
+    private function getStatData(): array
+    {
         $lastUnfinishedState = $this->stateRepository->getLastState(false);
-        return $this->render('admin/statistic.twig');
+
+        $data = [
+            'lastUnfinishedState' => [
+                'memoryUsage' => $lastUnfinishedState->getMemoryUsage(),
+                'percent' => $lastUnfinishedState->getPercent(),
+            ],
+        ];
+
+        return $data;
     }
 }
