@@ -4,7 +4,5 @@
     <div class="progress">
         <div class="progress-bar" role="progressbar" style="width: {{ lastUnfinishedState.percent  }}%;" aria-valuenow="{{ lastUnfinishedState.percent  }}" aria-valuemin="0" aria-valuemax="100">{{ lastUnfinishedState.percent  }}%</div>
     </div>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js@2.8.0"></script>
-    <canvas id="percentChart" data-percent="{{ lastUnfinishedState.percent }}"></canvas>
     <canvas id="memoryUsageChart" style="max-width: 500px;"></canvas>
 {% endblock %}

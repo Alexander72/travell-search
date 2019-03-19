@@ -6,6 +6,7 @@
  */
 
 require('./menu.js');
+require('./charts.js');
 
 require('../css/global.scss');
 // any CSS you require will output into a single css file (app.css in this case)
