@@ -5,4 +5,32 @@
         <div class="progress-bar" role="progressbar" style="width: {{ lastUnfinishedState.percent  }}%;" aria-valuenow="{{ lastUnfinishedState.percent  }}" aria-valuemin="0" aria-valuemax="100">{{ lastUnfinishedState.percent  }}%</div>
     </div>
     <canvas id="memoryUsageChart" style="max-width: 500px;"></canvas>
+    <table class="table table-dark">
+        <thead>
+            <tr>
+                <th>From</th>
+                <th>To</th>
+                <th>Updated</th>
+                <th>Status</th>
+                <th>Month</th>
+                <th>Percent</th>
+                <th>Memory usage</th>
+                <th>Started</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for state in states %}
+                <tr>
+                    <td>{{ state.origin.name }}</td>
+                    <td>{{ state.destination.name }}</td>
+                    <td>{{ state.updated|date('d.m.Y H:i:s') }}</td>
+                    <td>{{ state.status }}</td>
+                    <td>{{ state.departMonthFirstDay|date('d.m.Y') }}</td>
+                    <td>{{ state.percent }}</td>
+                    <td>{{ state.memoryUsage }}</td>
+                    <td>{{ state.startedAt|date('d.m.Y H:i:s') }}</td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
 {% endblock %}

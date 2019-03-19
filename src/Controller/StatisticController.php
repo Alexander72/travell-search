@@ -30,6 +30,7 @@ class StatisticController extends AbstractController
     public function index()
     {
         $data = $this->getStatData();
+        $data['states'] = $this->stateRepository->findBy([], ['id' => 'DESC']);
 
         return $this->render('admin/statistic.twig', $data);
     }
