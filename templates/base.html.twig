@@ -17,7 +17,9 @@
                 <div class="sidebar-heading"><a href="/">Travel Search</a></div>
                 <div class="list-group list-group-flush">
                     <a href="{{ path('searchForm') }}" class="{{ app.request.get('_route') == 'searchForm' ? 'active ' : 'bg-light' }} list-group-item list-group-item-action">Search trip</a>
-                    <a href="{{ path('statistic') }}" class="{{ app.request.get('_route') == 'statistic' ? 'active ' : 'bg-light' }} list-group-item list-group-item-action">Loading process</a>
+                    {% if is_granted('ROLE_ADMIN') %}
+                        <a href="{{ path('statistic') }}" class="{{ app.request.get('_route') == 'statistic' ? 'active ' : 'bg-light' }} list-group-item list-group-item-action">Loading process</a>
+                    {% endif %}
                 </div>
             </div>
             <!-- /#sidebar-wrapper -->
