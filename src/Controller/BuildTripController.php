@@ -81,10 +81,10 @@ class BuildTripController extends AbstractController
 
             $trips = $this->postProcessTrips($trips);
 
-            return $this->render('foundedTrips.twig', ['trips' => $trips]);
+            return $this->render('searchRequest/foundedTrips.twig', ['trips' => $trips]);
         }
 
-        return $this->render('buildTripForm.twig', ['form' => $form->createView()]);
+        return $this->render('searchRequest/buildTripForm.twig', ['form' => $form->createView()]);
     }
 
     /**

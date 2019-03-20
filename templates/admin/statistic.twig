@@ -1,5 +1,5 @@
 {% extends 'base.html.twig' %}
-{% block body %}
+{% block content %}
     <h5>Current loading process:</h5>
     <div class="progress">
         <div class="progress-bar" role="progressbar" style="width: {{ lastUnfinishedState.percent  }}%;" aria-valuenow="{{ lastUnfinishedState.percent  }}" aria-valuemin="0" aria-valuemax="100">{{ lastUnfinishedState.percent  }}%</div>
