@@ -1,7 +1,7 @@
 {% extends 'base.html.twig' %}
 
 {% block bootstrap_example %}{% endblock %}
-{% block body %}
+{% block content %}
     {% for trip in trips %}
         <h3>Total price: {{ trip.price }}</h3>
         <ul>

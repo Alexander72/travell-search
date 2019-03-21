@@ -29,6 +29,8 @@ class StatisticController extends AbstractController
      */
     public function index()
     {
+        $this->denyAccessUnlessGranted('ROLE_ADMIN');
+
         $data = $this->getStatData();
         $data['states'] = $this->stateRepository->findBy([], ['id' => 'DESC']);
 
@@ -40,6 +42,8 @@ class StatisticController extends AbstractController
      */
     public function statisticApiData()
     {
+        $this->denyAccessUnlessGranted('ROLE_ADMIN');
+
         $data = $this->getStatData();
 
         return new JsonResponse($data);
