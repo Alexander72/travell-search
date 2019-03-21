@@ -10,6 +10,13 @@
     <body class="bg-light">
 
     {% block body %}
+
+        {% for message in app.flashes('success') %}
+            <div class="alert alert-success">
+                {{ message }}
+            </div>
+        {% endfor %}
+
         <div class="d-flex" id="wrapper">
 
             <!-- Sidebar -->
@@ -17,6 +24,7 @@
                 <div class="sidebar-heading"><a href="/">Travel Search</a></div>
                 <div class="list-group list-group-flush">
                     <a href="{{ path('searchForm') }}" class="{{ app.request.get('_route') == 'searchForm' ? 'active ' : 'bg-light' }} list-group-item list-group-item-action">Search trip</a>
+                    <a href="{{ path('feedback') }}" class="{{ app.request.get('_route') == 'feedback' ? 'active ' : 'bg-light' }} list-group-item list-group-item-action">Feedback</a>
                     {% if is_granted('ROLE_ADMIN') %}
                         <a href="{{ path('statistic') }}" class="{{ app.request.get('_route') == 'statistic' ? 'active ' : 'bg-light' }} list-group-item list-group-item-action">Loading process</a>
                     {% endif %}
