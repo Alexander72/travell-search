@@ -1,0 +1,9 @@
+{% extends 'base.html.twig' %}
+{% block content %}
+    {% if formTitle %}
+        <div class="py-5 text-center">
+            <h2>{{ formTitle }}</h2>
+        </div>
+    {% endif %}
+    {{ form(form) }}
+{% endblock %}

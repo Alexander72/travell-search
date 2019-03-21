@@ -84,7 +84,7 @@ class BuildTripController extends AbstractController
             return $this->render('searchRequest/foundedTrips.twig', ['trips' => $trips]);
         }
 
-        return $this->render('searchRequest/buildTripForm.twig', ['form' => $form->createView()]);
+        return $this->render('baseForm.twig', ['formTitle' => 'Search form', 'form' => $form->createView()]);
     }
 
     /**
