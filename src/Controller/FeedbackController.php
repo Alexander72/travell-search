@@ -38,7 +38,7 @@ class FeedbackController extends AbstractController
             $em->persist($feedback);
             $em->flush();
 
-            $this->addFlash('success', 'Thank you! Your feedback will improve this system!');
+            $this->addFlash('success', "Thank you, {$formData['name']}! Your feedback will improve this system!");
 
             return $this->redirect('/feedback');
         }
