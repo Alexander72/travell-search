@@ -88,6 +88,7 @@ class TripBuilder
 
         $trip = new Trip();
 
+        \ini_set('memory_limit', '512M');
         $this->routeRepository->preloadRoutes($this->getOption('startTime'), $this->getOption('finishTime'), $this->getOption('maxPrice'));
 
         $this->doBuildTrips($trip);
