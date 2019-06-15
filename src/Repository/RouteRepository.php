@@ -71,6 +71,23 @@ class RouteRepository extends ServiceEntityRepository
         }
     }
 
+    public function getMinMaxPricesForStatMap(): array
+    {
+        $query = "
+            SELECT MAX(price), MIN(price), COUNT(*) FROM ({$this->getQueryForStatMap()})t
+        ";
+
+        $result = $this->getEntityManager()->getConnection()->executeQuery($query)->fetchAll();
+        return array_values(reset($result));
+    }
+
+    public function getPricesForStatMap(): array
+    {
+        $query = $this->getQueryForStatMap();
+
+        return $this->getEntityManager()->getConnection()->executeQuery($query)->fetchAll();
+    }
+
     /**
      * @param City     $startCity
      * @param DateTime $startTime
@@ -129,5 +146,20 @@ class RouteRepository extends ServiceEntityRepository
         }
 
         return $result;
+    }
+
+    /**
+     * @return string
+     */
+    private function getQueryForStatMap(): string
+    {
+        $query = "
+            SELECT o.lat origin_lat, o.lon origin_lon, d.lat destination_lat, d.lon destination_lon, AVG(r.price) price
+            FROM route r
+            JOIN city o ON o.code = r.origin_id
+            JOIN city d ON d.code = r.destination_id
+            GROUP BY o.lat, o.lon, d.lat, d.lon
+        ";
+        return $query;
     }
 }

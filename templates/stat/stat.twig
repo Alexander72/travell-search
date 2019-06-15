@@ -1,0 +1,25 @@
+{% extends 'base.html.twig' %}
+{% block content %}
+    <div id="europe-flights-map" style="height: 800px"></div>
+    <script>
+        var routes = [
+            {% for route in routes %}
+                {
+                    origin: {
+                        latitude: {{ route.origin_lat }},
+                        longitude: {{ route.origin_lon }}
+                    },
+                    destination: {
+                        latitude: {{ route.destination_lat }},
+                        longitude: {{ route.destination_lon }}
+                    },
+                    options: {
+                        strokeWidth: 3,
+                        strokeColor: 'rgba({{ route.price * 255 }},{{ (1 -route.price) * 255 }},0,0.57)',
+                        greatArc: true
+                    }
+                },
+            {% endfor %}
+        ];
+    </script>
+{% endblock %}

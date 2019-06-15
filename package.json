@@ -16,6 +16,7 @@
     "dependencies": {
         "bootstrap": "^4.3.1",
         "chart.js": "^2.8.0",
+        "datamaps": "^0.5.9",
         "jquery": "^3.3.1",
         "popper.js": "^1.14.7"
     }
