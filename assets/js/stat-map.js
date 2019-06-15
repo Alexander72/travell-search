@@ -10,7 +10,7 @@ var arcs = new Datamap({
         var projection = d3.geo.equirectangular()
             .center([10, 5])
             .rotate([-10, -45])
-            .scale(1200)
+            .scale(1000)
             .translate([element.offsetWidth / 2, element.offsetHeight / 2]);
         var path = d3.geo.path()
             .projection(projection);
