@@ -4,7 +4,7 @@ var arcs = new Datamap({
     element: document.getElementById("europe-flights-map"),
     scope: 'world',
     fills: {
-        defaultFill: "rgba(70,133,255,0.48)",
+        defaultFill: "rgba(26,11,73,0.97)",
     },
     setProjection: function(element) {
         var projection = d3.geo.equirectangular()
