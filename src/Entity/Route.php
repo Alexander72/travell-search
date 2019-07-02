@@ -10,6 +10,8 @@ use \App\Entity\City;
  */
 class Route
 {
+    const RELEVANCE_MAX_AGE = 14;
+
     /**
      * @ORM\Id()
      * @ORM\GeneratedValue()

@@ -105,20 +105,23 @@ class TripBuilder
             $this->getOption('startCity'),
             $this->getOption('finishCity'),
             $this->getOption('startTime'),
-            $this->getOption('finishTime')
+            $this->getOption('finishTime'),
+            $this->getOption('maxAge')
         );
 
         $maxPrice = $this->getOption('maxPrice');
         if($cheapestDirectRoute)
         {
-            $directTrip = new Trip();
-            $directTrip->addRoute($cheapestDirectRoute);
-            $this->finalizeTrip($directTrip);
             $maxPrice = min($this->getOption('maxPrice'), $cheapestDirectRoute->getPrice());
             $this->setOption('maxPrice', $maxPrice);
         }
 
-        $this->routeRepository->preloadRoutes($this->getOption('startTime'), $this->getOption('finishTime'), $maxPrice);
+        $this->routeRepository->preloadRoutes(
+            $this->getOption('startTime'),
+            $this->getOption('finishTime'),
+            $maxPrice,
+            $this->getOption('maxAge')
+        );
 
         $this->startAt = time();
         $this->doBuildTrips($trip);

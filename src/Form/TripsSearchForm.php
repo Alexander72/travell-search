@@ -47,6 +47,14 @@ class TripsSearchForm extends AbstractType
                 new Assert\LessThan(10),
             ]
         ]);
+        $formBuilder->add('maxAge', IntegerType::class, [
+            'constraints' => [
+                new Assert\LessThanOrEqual(30),
+                new Assert\GreaterThanOrEqual(1),
+            ],
+            'label' => 'Relevance',
+            'help' => 'Specify age (in days) of stored flights to use in trip searching',
+        ]);
         $formBuilder->add('search', SubmitType::class);
         return $formBuilder->getForm();
     }

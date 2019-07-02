@@ -8,6 +8,7 @@ use DateTime;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\ORM\Query\Parameter;
+use Doctrine\ORM\QueryBuilder;
 use Symfony\Bridge\Doctrine\RegistryInterface;
 
 /**
@@ -27,7 +28,7 @@ class RouteRepository extends ServiceEntityRepository
         parent::__construct($registry, Route::class);
     }
 
-    public function preloadRoutes(DateTime $startTime, DateTime $finishTime, int $maxPrice, bool $onlyActual = true)
+    public function preloadRoutes(DateTime $startTime, DateTime $finishTime, int $maxPrice, ?int $routeMaxAge = null)
     {
         $qb = $this->createQueryBuilder('r');
         $qb->where('r.departureDay >= :startTime');
@@ -36,17 +37,15 @@ class RouteRepository extends ServiceEntityRepository
         $qb->orderBy('r.departureDay');
         $qb->orderBy('r.price');
 
-        if($onlyActual)
-        {
-            $qb->andWhere('r.savedAt >= :searchRoutesSavedFrom');
-            $qb->setParameter('searchRoutesSavedFrom', $this->getActualFrom());
-        }
-
         $qb->setParameter('startTime', $startTime);
         $qb->setParameter('finishTime', $finishTime);
         $qb->setParameter('maxPrice', $maxPrice);
 
+        $this->addAgeCondition($qb, $routeMaxAge);
+
         $queryResult = $qb->getQuery()->getResult();
+
+        $this->preloadedRoutes = [];
         foreach($queryResult as $route)
         {
             $origin = $route->getOrigin()->getCode();
@@ -100,7 +99,13 @@ class RouteRepository extends ServiceEntityRepository
      * @return Route|null
      * @throws \Doctrine\ORM\NonUniqueResultException
      */
-    public function getCheapestDirectRoute(City $startCity, City $finishCity, DateTime $startTime, DateTime $finishTime, bool $onlyActual = true): ?Route
+    public function getCheapestDirectRoute(
+        City $startCity,
+        City $finishCity,
+        DateTime $startTime,
+        DateTime $finishTime,
+        ?int $routeMaxAge = null
+    ): ?Route
     {
         $qb = $this->createQueryBuilder('r');
 
@@ -110,33 +115,34 @@ class RouteRepository extends ServiceEntityRepository
         $qb->andWhere('r.departureDay <= :finishTime');
         $qb->orderBy('r.price', 'ASC');
 
-
-        if($onlyActual)
-        {
-            $qb->andWhere('r.savedAt >= :searchRoutesSavedFrom');
-            $qb->setParameter('searchRoutesSavedFrom', $this->getActualFrom());
-        }
-
         $qb->setParameter('origin', $startCity);
         $qb->setParameter('destination', $finishCity);
         $qb->setParameter('startTime', $startTime);
         $qb->setParameter('finishTime', $finishTime);
 
+        $this->addAgeCondition($qb, $routeMaxAge);
+
         $qb->setMaxResults(1);
 
-        $query = $qb->getQuery();
-        return $query->useResultCache(true)->getOneOrNullResult();
+        return $qb->getQuery()->useResultCache(true)->getOneOrNullResult();
     }
 
     /**
-     * @param City     $startCity
+     * @param City $startCity
      * @param DateTime $startTime
      * @param DateTime $finishTime
-     * @param int      $maxPrice
-     *
+     * @param int $maxPrice
+     * @param int|null $routeMaxAge
      * @return array
+     * @throws \Exception
      */
-    private function getRoutesFromCityFromDB(City $startCity, DateTime $startTime, DateTime $finishTime, int $maxPrice): array
+    private function getRoutesFromCityFromDB(
+        City $startCity,
+        DateTime $startTime,
+        DateTime $finishTime,
+        int $maxPrice,
+        ?int $routeMaxAge = null
+    ): array
     {
         $qb = $this->createQueryBuilder('r');
 
@@ -146,12 +152,12 @@ class RouteRepository extends ServiceEntityRepository
         $qb->andWhere('r.price <= :maxPrice');
         $qb->orderBy('r.price', 'DESC');
 
-        $qb->setParameters(new ArrayCollection([
-            new Parameter('origin', $startCity),
-            new Parameter('startTime', $startTime),
-            new Parameter('finishTime', $finishTime),
-            new Parameter('maxPrice', $maxPrice),
-        ]));
+        $qb->setParameter('origin', $startCity);
+        $qb->setParameter('startTime', $startTime);
+        $qb->setParameter('finishTime', $finishTime);
+        $qb->setParameter('maxPrice', $maxPrice);
+
+        $this->addAgeCondition($qb, $routeMaxAge);
 
         return $qb->getQuery()->useResultCache(true)->getResult();
     }
@@ -205,11 +211,17 @@ class RouteRepository extends ServiceEntityRepository
     }
 
     /**
-     * @return DateTime
+     * @param QueryBuilder $qb
+     * @param int|null $maxAgeInDays
+     * @return QueryBuilder
      * @throws \Exception
      */
-    private function getActualFrom(): DateTime
+    private function addAgeCondition(QueryBuilder $qb, ?int $maxAgeInDays): QueryBuilder
     {
-        return new DateTime('-3 weeks');
+        $maxAgeInDays = $maxAgeInDays ?: Route::RELEVANCE_MAX_AGE;
+        $qb->andWhere('r.savedAt >= :searchRoutesSavedFrom');
+        $qb->setParameter('searchRoutesSavedFrom', new DateTime("-$maxAgeInDays days"));
+
+        return $qb;
     }
 }

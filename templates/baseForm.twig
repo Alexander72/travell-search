@@ -1,9 +1,21 @@
 {% extends 'base.html.twig' %}
 {% block content %}
-    {% if formTitle %}
-        <div class="py-5 text-center">
-            <h2>{{ formTitle }}</h2>
-        </div>
-    {% endif %}
+    <div class="py-5 text-center">
+        <h2>Search form</h2>
+    </div>
     {{ form(form) }}
+    {% if trips is defined %}
+        <hr>
+        {% if trips %}<h2>Founded trips:</h2>{% endif %}
+        {% for trip in trips %}
+            <h3>Total price: {{ trip.price }}</h3>
+            <ul>
+                {% for route in trip.routes %}
+                    <li>From: {{ route.origin.name }} -> to: {{ route.destination.name }}; Price: {{ route.price }}; Departure at: {{ route.departureDay|date('d.m.Y') }}; Flight saved at {{ route.savedAt|date('d.m.Y') }}</li>
+                {% endfor %}
+            </ul>
+        {% else %}
+            <div class="py-5 text-center">No trips found.</div>
+        {% endfor %}
+    {% endif %}
 {% endblock %}
