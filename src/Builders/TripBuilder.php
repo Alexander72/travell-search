@@ -45,7 +45,6 @@ class TripBuilder
     public function __construct(RouteRepository $routeRepository)
     {
         $this->routeRepository = $routeRepository;
-        $this->startAt = time();
     }
 
     /**
@@ -79,6 +78,18 @@ class TripBuilder
     }
 
     /**
+     * @param string $option
+     * @param $value
+     * @return TripBuilder
+     */
+    public function setOption(string $option, $value): TripBuilder
+    {
+        $this->options[$option] = $value;
+
+        return $this;
+    }
+
+    /**
      * @return Trip[]
      * @throws IncorrectTripOptionsException
      */
@@ -89,8 +100,27 @@ class TripBuilder
         $trip = new Trip();
 
         \ini_set('memory_limit', '512M');
-        $this->routeRepository->preloadRoutes($this->getOption('startTime'), $this->getOption('finishTime'), $this->getOption('maxPrice'));
 
+        $cheapestDirectRoute = $this->routeRepository->getCheapestDirectRoute(
+            $this->getOption('startCity'),
+            $this->getOption('finishCity'),
+            $this->getOption('startTime'),
+            $this->getOption('finishTime')
+        );
+
+        $maxPrice = $this->getOption('maxPrice');
+        if($cheapestDirectRoute)
+        {
+            $directTrip = new Trip();
+            $directTrip->addRoute($cheapestDirectRoute);
+            $this->finalizeTrip($directTrip);
+            $maxPrice = min($this->getOption('maxPrice'), $cheapestDirectRoute->getPrice());
+            $this->setOption('maxPrice', $maxPrice);
+        }
+
+        $this->routeRepository->preloadRoutes($this->getOption('startTime'), $this->getOption('finishTime'), $maxPrice);
+
+        $this->startAt = time();
         $this->doBuildTrips($trip);
 
         return $this->builtTrip;

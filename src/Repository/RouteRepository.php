@@ -27,7 +27,7 @@ class RouteRepository extends ServiceEntityRepository
         parent::__construct($registry, Route::class);
     }
 
-    public function preloadRoutes(DateTime $startTime, DateTime $finishTime, int $maxPrice)
+    public function preloadRoutes(DateTime $startTime, DateTime $finishTime, int $maxPrice, bool $onlyActual = true)
     {
         $qb = $this->createQueryBuilder('r');
         $qb->where('r.departureDay >= :startTime');
@@ -36,11 +36,15 @@ class RouteRepository extends ServiceEntityRepository
         $qb->orderBy('r.departureDay');
         $qb->orderBy('r.price');
 
-        $qb->setParameters(new ArrayCollection([
-            new Parameter('startTime', $startTime),
-            new Parameter('finishTime', $finishTime),
-            new Parameter('maxPrice', $maxPrice),
-        ]));
+        if($onlyActual)
+        {
+            $qb->andWhere('r.savedAt >= :searchRoutesSavedFrom');
+            $qb->setParameter('searchRoutesSavedFrom', $this->getActualFrom());
+        }
+
+        $qb->setParameter('startTime', $startTime);
+        $qb->setParameter('finishTime', $finishTime);
+        $qb->setParameter('maxPrice', $maxPrice);
 
         $queryResult = $qb->getQuery()->getResult();
         foreach($queryResult as $route)
@@ -89,6 +93,42 @@ class RouteRepository extends ServiceEntityRepository
     }
 
     /**
+     * @param City $startCity
+     * @param City $finishCity
+     * @param DateTime $startTime
+     * @param DateTime $finishTime
+     * @return Route|null
+     * @throws \Doctrine\ORM\NonUniqueResultException
+     */
+    public function getCheapestDirectRoute(City $startCity, City $finishCity, DateTime $startTime, DateTime $finishTime, bool $onlyActual = true): ?Route
+    {
+        $qb = $this->createQueryBuilder('r');
+
+        $qb->where('r.origin = :origin');
+        $qb->andWhere('r.destination = :destination');
+        $qb->andWhere('r.departureDay >= :startTime');
+        $qb->andWhere('r.departureDay <= :finishTime');
+        $qb->orderBy('r.price', 'ASC');
+
+
+        if($onlyActual)
+        {
+            $qb->andWhere('r.savedAt >= :searchRoutesSavedFrom');
+            $qb->setParameter('searchRoutesSavedFrom', $this->getActualFrom());
+        }
+
+        $qb->setParameter('origin', $startCity);
+        $qb->setParameter('destination', $finishCity);
+        $qb->setParameter('startTime', $startTime);
+        $qb->setParameter('finishTime', $finishTime);
+
+        $qb->setMaxResults(1);
+
+        $query = $qb->getQuery();
+        return $query->useResultCache(true)->getOneOrNullResult();
+    }
+
+    /**
      * @param City     $startCity
      * @param DateTime $startTime
      * @param DateTime $finishTime
@@ -104,6 +144,7 @@ class RouteRepository extends ServiceEntityRepository
         $qb->andWhere('r.departureDay >= :startTime');
         $qb->andWhere('r.departureDay <= :finishTime');
         $qb->andWhere('r.price <= :maxPrice');
+        $qb->orderBy('r.price', 'DESC');
 
         $qb->setParameters(new ArrayCollection([
             new Parameter('origin', $startCity),
@@ -112,7 +153,7 @@ class RouteRepository extends ServiceEntityRepository
             new Parameter('maxPrice', $maxPrice),
         ]));
 
-        return $qb->getQuery()->useResultCache(true)->useResultCache(true)->getResult();
+        return $qb->getQuery()->useResultCache(true)->getResult();
     }
 
     /**
@@ -161,5 +202,14 @@ class RouteRepository extends ServiceEntityRepository
             GROUP BY o.lat, o.lon, d.lat, d.lon
         ";
         return $query;
+    }
+
+    /**
+     * @return DateTime
+     * @throws \Exception
+     */
+    private function getActualFrom(): DateTime
+    {
+        return new DateTime('-3 weeks');
     }
 }
