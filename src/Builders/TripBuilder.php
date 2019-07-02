@@ -126,6 +126,8 @@ class TripBuilder
         $this->startAt = time();
         $this->doBuildTrips($trip);
 
+        $this->routeRepository->resetPreloadedRoutes();
+
         return $this->builtTrip;
     }
 

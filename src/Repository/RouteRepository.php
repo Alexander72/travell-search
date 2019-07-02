@@ -54,6 +54,13 @@ class RouteRepository extends ServiceEntityRepository
         }
     }
 
+    public function resetPreloadedRoutes()
+    {
+        $this->preloadedRoutes = null;
+
+        return $this;
+    }
+
     /**
      * @param City     $startCity
      * @param DateTime $startTime
