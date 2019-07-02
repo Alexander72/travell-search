@@ -21,9 +21,9 @@ if(window.location.href.indexOf('admin/statistic') != -1) {
         });
     };
 
-    setInterval(function () {
+    /*setInterval(function () {
         updateMemoryUsageChart();
-    }, updateFrequencyInMilliseconds);
+    }, updateFrequencyInMilliseconds);*/
 
     const myLineChart = new Chart($('#memoryUsageChart')[0], {
         type: 'line',
