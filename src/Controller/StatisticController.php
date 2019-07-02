@@ -9,6 +9,7 @@
 namespace App\Controller;
 
 use App\Repository\LoadFlightsCommandStateRepository;
+use App\Repository\RouteRepository;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -17,10 +18,14 @@ class StatisticController extends AbstractController
 {
     private $stateRepository;
 
+    private $routeRepository;
+
     public function __construct(
-        LoadFlightsCommandStateRepository $stateRepository
+        LoadFlightsCommandStateRepository $stateRepository,
+        RouteRepository $routeRepository
     ) {
         $this->stateRepository = $stateRepository;
+        $this->routeRepository = $routeRepository;
     }
 
 
@@ -32,7 +37,7 @@ class StatisticController extends AbstractController
         $this->denyAccessUnlessGranted('ROLE_ADMIN');
 
         $data = $this->getStatData();
-        $data['states'] = $this->stateRepository->findBy([], ['id' => 'DESC']);
+        $data['states'] = $this->stateRepository->findBy([], ['id' => 'DESC'], 15);
 
         return $this->render('admin/statistic.twig', $data);
     }
@@ -55,14 +60,15 @@ class StatisticController extends AbstractController
      */
     private function getStatData(): array
     {
-        $lastUnfinishedState = $this->stateRepository->getLastState(false);
+        $data = [];
 
-        $data = [
-            'lastUnfinishedState' => [
-                'memoryUsage' => $lastUnfinishedState->getMemoryUsage(),
-                'percent' => $lastUnfinishedState->getPercent(),
-            ],
+        $lastUnfinishedState = $this->stateRepository->getLastState(false);
+        $data['lastUnfinishedState'] = [
+            'memoryUsage' => $lastUnfinishedState ? $lastUnfinishedState->getMemoryUsage(): 0,
+            'percent' => $lastUnfinishedState ? $lastUnfinishedState->getPercent() : 0,
         ];
+
+        $data['routesCount'] = $this->routeRepository->count([]);
 
         return $data;
     }
