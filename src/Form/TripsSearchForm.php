@@ -69,10 +69,12 @@ class TripsSearchForm extends AbstractType
         return [
             'class' => City::class,
             'choice_label' => 'name',
+            'required' => false,
             'help' => 'Field not required when country is specified.',
             'query_builder' => function(CityRepository $cityRepository) {
                 return $cityRepository->getLargeEuropeCitiesQueryBuilder();
-            }
+            },
+            'placeholder' => 'Select city',
         ];
     }
 

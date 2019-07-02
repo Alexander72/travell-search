@@ -8,6 +8,7 @@
 
 namespace App\Controller;
 
+use App\Entity\Trip;
 use Symfony\Component\Routing\Annotation\Route;
 use App\Builders\TripBuilder;
 use App\Form\TripsSearchForm;
@@ -57,16 +58,8 @@ class BuildTripController extends AbstractController
             $searchOptions = $form->getData();
             $trips = [];
 
-            $startCities = [$searchOptions['startCity']];
-            $finishCities = [$searchOptions['finishCity']];
-            if(!empty($searchOptions['startCountry']))
-            {
-                $startCities = $this->cityRepository->getLargeEuropeCities($searchOptions['startCountry']);
-            }
-            if(!empty($searchOptions['finishCountry']))
-            {
-                $finishCities = $this->cityRepository->getLargeEuropeCities($searchOptions['finishCountry']);
-            }
+            $startCities = $this->getStartCities($searchOptions);
+            $finishCities = $this->getFinishCities($searchOptions);
 
             foreach($startCities as $startCity)
             {
@@ -74,6 +67,7 @@ class BuildTripController extends AbstractController
                 {
                     $searchOptions['startCity'] = $startCity;
                     $searchOptions['finishCity'] = $finishCity;
+                    $searchOptions['maxPrice'] = $this->getCheapestTripPrice($trips, $searchOptions['maxPrice']);
                     $this->tripBuilder->setOptions($searchOptions);
                     $trips = $trips + $this->tripBuilder->buildTrips();
                 }
@@ -100,5 +94,71 @@ class BuildTripController extends AbstractController
         $trips = \array_slice($trips, 0, 50);
 
         return $trips;
+    }
+
+    /**
+     * @param array $searchOptions
+     * @return array
+     */
+    private function getStartCities(array $searchOptions): array
+    {
+        return $this->getCitiesForSearch($searchOptions, 'start');
+    }
+
+    /**
+     * @param array $searchOptions
+     * @return array
+     */
+    private function getFinishCities(array $searchOptions): array
+    {
+        return $this->getCitiesForSearch($searchOptions, 'finish');
+    }
+
+    /**
+     * @param array $searchOptions
+     * @param string $type
+     * @return \App\Entity\City[]|array
+     */
+    private function getCitiesForSearch(array $searchOptions, string $type)
+    {
+        $countryField = $type == 'start' ? 'startCountry' : 'finishCountry';
+        $cityField = $type == 'start' ? 'startCity' : 'finishCity';
+
+        $cities = [];
+        if(!empty($searchOptions[$cityField]))
+        {
+            $cities = [$searchOptions[$cityField]];
+        }
+        elseif($searchOptions[$countryField])
+        {
+            $cities = $this->cityRepository->getLargeEuropeCities($searchOptions[$countryField]);
+        }
+
+        return $cities;
+    }
+
+    /**
+     * @param Trip[] $trips
+     * @param int $defaultPrice
+     * @return int
+     */
+    private function getCheapestTripPrice(array $trips, int $defaultPrice)
+    {
+        if(!$trips)
+        {
+            return $defaultPrice;
+        }
+
+        $cheapestTripPrice = $defaultPrice;
+
+        foreach($trips as $trip)
+        {
+            if($cheapestTripPrice > $trip->getPrice())
+            {
+                $cheapestTripPrice = $trip->getPrice();
+            }
+        }
+
+        return $cheapestTripPrice;
     }
 }
