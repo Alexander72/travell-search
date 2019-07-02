@@ -10,6 +10,7 @@ namespace App\Form;
 
 use App\Entity\City;
 use App\Entity\Country;
+use App\Entity\Route;
 use App\Repository\CityRepository;
 use App\Repository\CountryRepository;
 use Symfony\Component\Form\AbstractType;
@@ -45,7 +46,7 @@ class TripsSearchForm extends AbstractType
         $formBuilder->add('maxChanges', IntegerType::class, [
             'constraints' => [
                 new Assert\LessThan(10),
-            ]
+            ],
         ]);
         $formBuilder->add('maxAge', IntegerType::class, [
             'constraints' => [
@@ -53,7 +54,8 @@ class TripsSearchForm extends AbstractType
                 new Assert\GreaterThanOrEqual(1),
             ],
             'label' => 'Relevance',
-            'help' => 'Specify age (in days) of stored flights to use in trip searching',
+            'help' => 'Specify age (in days) of stored flights to use in trip searching. Default is '.Route::RELEVANCE_MAX_AGE,
+            'required' => false,
         ]);
         $formBuilder->add('search', SubmitType::class);
         return $formBuilder->getForm();
