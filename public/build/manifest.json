@@ -1,6 +1,10 @@
 {
-  "build/0.f524f398.js": "/build/0.f524f398.js",
-  "build/app.css": "/build/app.fc43dd8e.css",
-  "build/app.js": "/build/app.3045662c.js",
-  "build/runtime.js": "/build/runtime.fa8f03f5.js"
+  "build/app.css": "/build/app.css",
+  "build/app.js": "/build/app.js",
+  "build/routes-statistic.css": "/build/routes-statistic.css",
+  "build/routes-statistic.js": "/build/routes-statistic.js",
+  "build/runtime.js": "/build/runtime.js",
+  "build/vendors~app.js": "/build/vendors~app.js",
+  "build/vendors~app~routes-statistic.js": "/build/vendors~app~routes-statistic.js",
+  "build/vendors~routes-statistic.js": "/build/vendors~routes-statistic.js"
 }

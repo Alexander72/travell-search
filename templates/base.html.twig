@@ -3,6 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <title>{% block title %}Welcome!{% endblock %}</title>
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
     {% block stylesheets %}
         {{ encore_entry_link_tags('app') }}
     {% endblock %}
@@ -24,11 +25,14 @@
 
             <!-- Sidebar -->
             <div class="bg-light border-right" id="sidebar-wrapper">
-                <div class="sidebar-heading"><a href="/">Travel Search</a></div>
+                <div class="sidebar-heading">
+                    <a href="/">Travel Search</a>
+                </div>
                 <div class="list-group list-group-flush">
                     <a href="{{ path('searchForm') }}" class="{{ app.request.get('_route') == 'searchForm' ? 'active ' : 'bg-light' }} list-group-item list-group-item-action">Search trip</a>
                     <a href="{{ path('feedback') }}" class="{{ app.request.get('_route') == 'feedback' ? 'active ' : 'bg-light' }} list-group-item list-group-item-action">Feedback</a>
                     <a href="{{ path('stat') }}" class="{{ app.request.get('_route') == 'stat' ? 'active ' : 'bg-light' }} list-group-item list-group-item-action">Statistic</a>
+                    <a href="{{ path('route_statistic') }}" class="{{ app.request.get('_route') == 'route_statistic' ? 'active ' : 'bg-light' }} list-group-item list-group-item-action">Route statistic</a>
                     {% if is_granted('ROLE_ADMIN') %}
                         <a href="{{ path('statistic') }}" class="{{ app.request.get('_route') == 'statistic' ? 'active ' : 'bg-light' }} list-group-item list-group-item-action">Loading process</a>
                     {% endif %}
@@ -40,7 +44,7 @@
             <div id="page-content-wrapper">
 
                 <nav class="navbar navbar-expand-lg navbar-light bg-light border-bottom">
-                    <button class="btn btn-primary" id="menu-toggle">Toggle Menu</button>
+                    <button class="btn btn-primary" id="menu-toggle"><i class="material-icons">menu</i></button>
     {#
                     <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
                         <span class="navbar-toggler-icon"></span>

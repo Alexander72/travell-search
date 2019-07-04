@@ -134,6 +134,60 @@ class RouteRepository extends ServiceEntityRepository
         return $qb->getQuery()->useResultCache(true)->getOneOrNullResult();
     }
 
+    public function getYearAvgPriceForRoute($originCode = null, $destinationCode = null)
+    {
+        $where = ['1 = 1'];
+        $params = [];
+
+        if($originCode)
+        {
+            $where[] = "origin_id = :origin";
+            $params['origin'] = $originCode;
+        }
+        if($destinationCode)
+        {
+            $where[] = "destination_id = :destination";
+            $params['destination'] = $destinationCode;
+        }
+        /** @TODO REMOVE SQL INJECTION!!!! */
+        $query = "
+            SELECT DATE_FORMAT(departure_day, '%c') month, AVG(price) price
+            FROM route
+            WHERE ".implode(' AND ', $where)."
+            GROUP BY DATE_FORMAT(departure_day, '%c')
+            ORDER BY month
+        ";
+
+        return $this->getEntityManager()->getConnection()->executeQuery($query, $params)->fetchAll();
+    }
+
+    public function getWeekAvgPriceForRoute($originCode = null, $destinationCode = null)
+    {
+        $where = ['1 = 1'];
+        $params = [];
+
+        if($originCode)
+        {
+            $where[] = "origin_id = :origin";
+            $params['origin'] = $originCode;
+        }
+        if($destinationCode)
+        {
+            $where[] = "destination_id = :destination";
+            $params['destination'] = $destinationCode;
+        }
+        /** @TODO REMOVE SQL INJECTION!!!! */
+        $query = "
+            SELECT DATE_FORMAT(departure_day, '%w') month, AVG(price) price
+            FROM route
+            WHERE ".implode(' AND ', $where)."
+            GROUP BY DATE_FORMAT(departure_day, '%w')
+            ORDER BY month
+        ";
+
+        return $this->getEntityManager()->getConnection()->executeQuery($query, $params)->fetchAll();
+    }
+
     /**
      * @param City $startCity
      * @param DateTime $startTime

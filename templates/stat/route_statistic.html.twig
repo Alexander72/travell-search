@@ -1,0 +1,9 @@
+{% extends 'base.html.twig' %}
+{% block content %}
+    <div id="routes-statistic"></div>
+{% endblock %}
+{% block javascripts %}
+    {{ parent() }}
+    {{ encore_entry_script_tags('routes-statistic') }}
+    {{ encore_entry_link_tags('routes-statistic') }}
+{% endblock %}
