@@ -2,24 +2,24 @@
   "entrypoints": {
     "app": {
       "js": [
-        "/build/runtime.js",
-        "/build/vendors~app~routes-statistic.js",
-        "/build/vendors~app.js",
-        "/build/app.js"
+        "/build/runtime.fa8f03f5.js",
+        "/build/0.83d2b012.js",
+        "/build/2.1cd5b1ac.js",
+        "/build/app.20d8ef71.js"
       ],
       "css": [
-        "/build/app.css"
+        "/build/app.fc43dd8e.css"
       ]
     },
     "routes-statistic": {
       "js": [
-        "/build/runtime.js",
-        "/build/vendors~app~routes-statistic.js",
-        "/build/vendors~routes-statistic.js",
-        "/build/routes-statistic.js"
+        "/build/runtime.fa8f03f5.js",
+        "/build/0.83d2b012.js",
+        "/build/1.d04bc1cf.js",
+        "/build/routes-statistic.0d2bde58.js"
       ],
       "css": [
-        "/build/routes-statistic.css"
+        "/build/routes-statistic.53a7bbf0.css"
       ]
     }
   }

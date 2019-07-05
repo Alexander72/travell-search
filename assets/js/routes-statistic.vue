@@ -67,14 +67,13 @@
             };
         },
         created() {
+            this.onSubmit();
             backend.getCities().then(cities => {
                 this.destinations = this.origins = cities;
             });
         },
         methods: {
-            onSubmit: function(e) {
-                e.preventDefault();
-
+            onSubmit: function() {
                 backend.getYearStatistic(this.origin, this.destination).then(data => {
                     this.yearStatistic = {
                         labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'],
