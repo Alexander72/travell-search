@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "3db9ee17e6323f8e389d7487d37e65c2",
+    "content-hash": "f93ddb473806c79d56dca4148ef4de3b",
     "packages": [
         {
             "name": "doctrine/annotations",
@@ -2030,16 +2030,16 @@
         },
         {
             "name": "symfony/cache",
-            "version": "v4.2.4",
+            "version": "v4.2.10",
             "source": {
                 "type": "git",
                 "url": "https://github.com/symfony/cache.git",
-                "reference": "b5c650406953f2f44a37c4f3ac66152fafc22c66"
+                "reference": "02de00b5dfc1c00b8fd6838c5ace976b435d9d49"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/symfony/cache/zipball/b5c650406953f2f44a37c4f3ac66152fafc22c66",
-                "reference": "b5c650406953f2f44a37c4f3ac66152fafc22c66",
+                "url": "https://api.github.com/repos/symfony/cache/zipball/02de00b5dfc1c00b8fd6838c5ace976b435d9d49",
+                "reference": "02de00b5dfc1c00b8fd6838c5ace976b435d9d49",
                 "shasum": ""
             },
             "require": {
@@ -2058,7 +2058,7 @@
             "provide": {
                 "psr/cache-implementation": "1.0",
                 "psr/simple-cache-implementation": "1.0",
-                "symfony/cache-contracts-implementation": "1.0"
+                "symfony/cache-implementation": "1.0"
             },
             "require-dev": {
                 "cache/integration-tests": "dev-master",
@@ -2103,7 +2103,7 @@
                 "caching",
                 "psr6"
             ],
-            "time": "2019-02-23T15:17:42+00:00"
+            "time": "2019-06-17T17:31:01+00:00"
         },
         {
             "name": "symfony/config",

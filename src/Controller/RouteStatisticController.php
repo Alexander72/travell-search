@@ -4,19 +4,26 @@
 namespace App\Controller;
 
 use App\Repository\RouteRepository;
+use Symfony\Component\Cache\Adapter\AdapterInterface;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Contracts\Cache\CacheInterface;
+use Symfony\Contracts\Cache\ItemInterface;
 
 class RouteStatisticController extends AbstractController
 {
     private $routeRepository;
 
+    private $cache;
+
     public function __construct(
-        RouteRepository $routeRepository
+        RouteRepository $routeRepository,
+        CacheInterface $cache
     ) {
         $this->routeRepository = $routeRepository;
+        $this->cache = $cache;
     }
     
     /**
@@ -38,8 +45,15 @@ class RouteStatisticController extends AbstractController
     {
         $originCode = $request->query->get('origin');
         $destinationCode = $request->query->get('destination');
-        $data = $this->routeRepository->getYearAvgPriceForRoute($originCode, $destinationCode);
-        $data = array_map(function($priceData){return $priceData['price'];}, $data);
+
+        $cacheKey = "route_year_avg_price_statistic_{$originCode}_{$destinationCode}";
+        $data = $this->cache->get($cacheKey, function(ItemInterface $item) use ($originCode, $destinationCode) {
+            $data = $this->routeRepository->getYearAvgPriceForRoute($originCode, $destinationCode);
+            $data = array_map(function($priceData){return $priceData['price'];}, $data);
+            $item->expiresAfter(24*60*60);
+            return $data;
+        });
+
         return new JsonResponse($data);
     }
 
@@ -52,8 +66,15 @@ class RouteStatisticController extends AbstractController
     {
         $originCode = $request->query->get('origin');
         $destinationCode = $request->query->get('destination');
-        $data = $this->routeRepository->getWeekAvgPriceForRoute($originCode, $destinationCode);
-        $data = array_map(function($priceData){return $priceData['price'];}, $data);
+
+        $cacheKey = "route_week_avg_price_statistic_{$originCode}_{$destinationCode}";
+        $data = $this->cache->get($cacheKey, function(ItemInterface $item) use ($originCode, $destinationCode) {
+            $data = $this->routeRepository->getWeekAvgPriceForRoute($originCode, $destinationCode);
+            $data = array_map(function($priceData){return $priceData['price'];}, $data);
+            $item->expiresAfter(24*60*60);
+            return $data;
+        });
+
         return new JsonResponse($data);
     }
 }
