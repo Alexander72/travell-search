@@ -3,27 +3,26 @@
 
 namespace App\Controller;
 
-use App\Repository\RouteRepository;
-use Symfony\Component\Cache\Adapter\AdapterInterface;
+use App\Repository\CityRepository;
+use App\Services\RoutesAvgPriceService;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
-use Symfony\Contracts\Cache\CacheInterface;
-use Symfony\Contracts\Cache\ItemInterface;
 
 class RouteStatisticController extends AbstractController
 {
-    private $routeRepository;
+    private $cityRepository;
 
-    private $cache;
+    private $avgPriceService;
 
     public function __construct(
-        RouteRepository $routeRepository,
-        CacheInterface $cache
+        CityRepository $cityRepository,
+        RoutesAvgPriceService $avgPriceService
     ) {
-        $this->routeRepository = $routeRepository;
-        $this->cache = $cache;
+        $this->cityRepository = $cityRepository;
+        $this->avgPriceService = $avgPriceService;
     }
     
     /**
@@ -37,43 +36,42 @@ class RouteStatisticController extends AbstractController
     }
 
     /**
-     * @Route("/api/v1/statistic/year", name="api_statistic_year")
+     * @Route("/api/v1/statistic/route_avg_price", name="route_avg_price_statistic")
      * @param Request $request
      * @return \Symfony\Component\HttpFoundation\Response
      */
-    public function yearStatistic(Request $request)
+    public function routeAvgPriceStatistic(Request $request)
     {
+        $origin = $destination = null;
+
         $originCode = $request->query->get('origin');
         $destinationCode = $request->query->get('destination');
+        $periodType = $request->query->get('periodType');
 
-        $cacheKey = "route_year_avg_price_statistic_{$originCode}_{$destinationCode}";
-        $data = $this->cache->get($cacheKey, function(ItemInterface $item) use ($originCode, $destinationCode) {
-            $data = $this->routeRepository->getYearAvgPriceForRoute($originCode, $destinationCode);
-            $data = array_map(function($priceData){return $priceData['price'];}, $data);
-            $item->expiresAfter(24*60*60);
-            return $data;
-        });
+        if(!in_array($periodType, ['year', 'week']))
+        {
+            throw new NotFoundHttpException();
+        }
 
-        return new JsonResponse($data);
-    }
+        if($originCode)
+        {
+            $origin = $this->cityRepository->find($originCode);
+            if(!$origin)
+            {
+                throw new NotFoundHttpException();
+            }
+        }
 
-    /**
-     * @Route("/api/v1/statistic/week", name="api_statistic_week")
-     * @param Request $request
-     * @return \Symfony\Component\HttpFoundation\Response
-     */
-    public function weekStatistic(Request $request)
-    {
-        $originCode = $request->query->get('origin');
-        $destinationCode = $request->query->get('destination');
+        if($destinationCode)
+        {
+            $destination = $this->cityRepository->find($destinationCode);
+            if(!$destination)
+            {
+                throw new NotFoundHttpException();
+            }
+        }
 
-        $cacheKey = "route_week_avg_price_statistic_{$originCode}_{$destinationCode}";
-        $data = $this->cache->get($cacheKey, function(ItemInterface $item) use ($originCode, $destinationCode) {
-            $data = $this->routeRepository->getWeekAvgPriceForRoute($originCode, $destinationCode);
-            $data = array_map(function($priceData){return $priceData['price'];}, $data);
-            $item->expiresAfter(24*60*60);
-            return $data;
-        });
+        $data = $this->avgPriceService->getRouteAvgPrice($periodType, $origin, $destination);
 
         return new JsonResponse($data);
     }

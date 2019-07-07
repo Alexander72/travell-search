@@ -134,58 +134,68 @@ class RouteRepository extends ServiceEntityRepository
         return $qb->getQuery()->useResultCache(true)->getOneOrNullResult();
     }
 
-    public function getYearAvgPriceForRoute($originCode = null, $destinationCode = null)
+    public function getAvgPriceForRoute(string $period, City $origin = null, City $destination = null)
     {
         $where = ['1 = 1'];
         $params = [];
 
-        if($originCode)
+        if($origin)
         {
             $where[] = "origin_id = :origin";
-            $params['origin'] = $originCode;
+            $params['origin'] = $origin->getCode();
         }
-        if($destinationCode)
+        if($destination)
         {
             $where[] = "destination_id = :destination";
-            $params['destination'] = $destinationCode;
+            $params['destination'] = $destination->getCode();
         }
-        /** @TODO REMOVE SQL INJECTION!!!! */
+        $where = implode(' AND ', $where);
+
+        $valuesStartsFrom = 1;
+        switch ($period)
+        {
+            case 'year':
+                $periodFormat = '%c';
+                $valuesCount = 12;
+                break;
+            case 'week':
+                $periodFormat = '%w';
+                $valuesCount = 6;
+                $valuesStartsFrom = 0;
+                break;
+            case 'month':
+                $periodFormat = '%e';
+                $valuesCount = 31;
+                break;
+            default:
+                throw new \Exception("Incorrect period $period");
+        }
+
+        $periodsQuery = array_map(function($i){return "SELECT $i AS value";}, range($valuesStartsFrom, $valuesCount));
+        $periodsQuery = implode(" UNION \n", $periodsQuery);
+
         $query = "
-            SELECT DATE_FORMAT(departure_day, '%c') month, AVG(price) price
-            FROM route
-            WHERE ".implode(' AND ', $where)."
-            GROUP BY DATE_FORMAT(departure_day, '%c')
-            ORDER BY month
+            SELECT periods.value AS period, prices.price 
+            FROM (
+              SELECT DATE_FORMAT(departure_day, '$periodFormat') period, AVG(price) price
+              FROM route
+              WHERE $where
+              GROUP BY DATE_FORMAT(departure_day, '$periodFormat')
+            ) prices
+            RIGHT JOIN ($periodsQuery) periods ON periods.value = prices.period
+            ORDER BY CAST(periods.value AS unsigned)            
         ";
 
-        return $this->getEntityManager()->getConnection()->executeQuery($query, $params)->fetchAll();
-    }
+        $data = $this->getEntityManager()->getConnection()->executeQuery($query, $params)->fetchAll();
 
-    public function getWeekAvgPriceForRoute($originCode = null, $destinationCode = null)
-    {
-        $where = ['1 = 1'];
-        $params = [];
-
-        if($originCode)
+        if($period == 'week')
         {
-            $where[] = "origin_id = :origin";
-            $params['origin'] = $originCode;
+            $data[] = ['period' => (string) ($valuesCount + 1), 'price' => $data[0]['price']];
+            unset($data[0]);
+            $data = array_values($data);
         }
-        if($destinationCode)
-        {
-            $where[] = "destination_id = :destination";
-            $params['destination'] = $destinationCode;
-        }
-        /** @TODO REMOVE SQL INJECTION!!!! */
-        $query = "
-            SELECT DATE_FORMAT(departure_day, '%w') month, AVG(price) price
-            FROM route
-            WHERE ".implode(' AND ', $where)."
-            GROUP BY DATE_FORMAT(departure_day, '%w')
-            ORDER BY month
-        ";
 
-        return $this->getEntityManager()->getConnection()->executeQuery($query, $params)->fetchAll();
+        return $data;
     }
 
     /**

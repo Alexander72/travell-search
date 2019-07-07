@@ -7,22 +7,14 @@ export default {
             return response.data;
         });
     },
-    getYearStatistic(origin, destination) {
+    getRouteAvgStatistic(periodType, origin, destination) {
         const data = {
+            periodType: periodType,
             origin: origin,
             destination: destination
         };
-        return axios.get('/api/v1/statistic/year?'+queryString.stringify(data)).then(response => {
-            return response.data;
+        return axios.get('/api/v1/statistic/route_avg_price?'+queryString.stringify(data)).then(response => {
+            return response.data.map(item => item.price);
         });
     },
-    getWeekStatistic(origin, destination) {
-        const data = {
-            origin: origin,
-            destination: destination
-        };
-        return axios.get('/api/v1/statistic/week?'+queryString.stringify(data)).then(response => {
-            return response.data;
-        });
-    }
 }
