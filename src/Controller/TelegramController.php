@@ -8,8 +8,10 @@ use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
+use TelegramBot\Api\BotApi;
 use TelegramBot\Api\Client;
 use TelegramBot\Api\Types\Message;
+use TelegramBot\Api\Types\Update;
 
 class TelegramController extends AbstractController
 {
@@ -32,7 +34,10 @@ class TelegramController extends AbstractController
             $bot->sendMessage($telegramMessage->getChatId(), $telegramMessage->getText());
         });
 
-        $bot->run();
+        if($data = json_decode(preg_replace('/[\x00-\x1F\x80-\xFF]/', '', $bot->getRawBody()), true))
+        {
+            $bot->handle([Update::fromResponse($data)]);
+        }
 
         return new Response();
     }
