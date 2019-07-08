@@ -18,6 +18,8 @@ class TelegramController extends AbstractController
      */
     public function hook(Client $bot, EntityManagerInterface $em)
     {
+        file_put_contents('/motivity/var/log/tg.log', file_get_contents('php://input'), FILE_APPEND);
+
         $bot->command('echo', function(Message $message) use ($bot, $em) {
             $telegramMessage = new TelegramMessage();
             $telegramMessage->setDirection(TelegramMessage::DIRECTION_INCOME);
