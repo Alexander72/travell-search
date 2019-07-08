@@ -340,6 +340,9 @@
     "symfony/yaml": {
         "version": "v4.2.3"
     },
+    "telegram-bot/api": {
+        "version": "v2.3.13"
+    },
     "twig/twig": {
         "version": "v2.6.2"
     },

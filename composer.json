@@ -21,7 +21,8 @@
         "symfony/security-bundle": "4.2.*",
         "symfony/validator": "4.2.*",
         "symfony/webpack-encore-bundle": "^1.1",
-        "symfony/yaml": "4.2.*"
+        "symfony/yaml": "4.2.*",
+        "telegram-bot/api": "^2.3"
     },
     "config": {
         "preferred-install": {
