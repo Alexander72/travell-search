@@ -4,6 +4,7 @@
 namespace App\Controller;
 
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 use TelegramBot\Api\Client;
 use TelegramBot\Api\Types\Message;
@@ -20,5 +21,7 @@ class TelegramController extends AbstractController
         });
 
         $bot->run();
+
+        return new Response();
     }
 }
