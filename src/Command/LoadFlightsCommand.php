@@ -4,12 +4,14 @@ namespace App\Command;
 
 use App\Entity\City;
 use App\Entity\Route;
+use App\Events\NewRouteLoadedEvent;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Style\SymfonyStyle;
+use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 
 class LoadFlightsCommand extends Command
 {
@@ -23,15 +25,19 @@ class LoadFlightsCommand extends Command
 
     protected $em;
 
+    protected $eventDispatcher;
+
     public function __construct(
         $apiUrl,
         $apiToken,
-        EntityManagerInterface $em
+        EntityManagerInterface $em,
+        EventDispatcherInterface $eventDispatcher
     ) {
         parent::__construct();
         $this->apiToken = $apiToken;
         $this->apiUrl = $apiUrl;
         $this->em = $em;
+        $this->eventDispatcher = $eventDispatcher;
     }
 
     protected function configure()
@@ -89,6 +95,7 @@ class LoadFlightsCommand extends Command
             if(!$this->em->getRepository(Route::class)->findBy($criteria))
             {
                 $this->em->merge($flight);
+                $this->eventDispatcher->dispatch(NewRouteLoadedEvent::NAME, new NewRouteLoadedEvent($flight));
             }
         }
 
