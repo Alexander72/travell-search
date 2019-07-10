@@ -35,11 +35,11 @@ class FlightAvgPriceSubscribeRepository extends ServiceEntityRepository
 
         $qb->where('s.priceDropPercent <= :maxPercent');
         $qb->andWhere('(s.origin = :origin OR s.origin IS NULL)');
-        $qb->andWhere('(s.origin = :destination OR s.origin IS NULL)');
+        $qb->andWhere('(s.destination = :destination OR s.origin IS NULL)');
         $qb->andWhere('(s.from <= :departureDay OR s.from IS NULL)');
         $qb->andWhere('(s.to >= :departureDay OR s.to IS NULL)');
 
-        $qb->setParameter('maxPercent', $maxPercent);
+        $qb->setParameter('maxPercent', $maxPercent, Type::FLOAT);
         $qb->setParameter('origin', $origin->getCode());
         $qb->setParameter('destination', $destination->getCode());
         $qb->setParameter('departureDay', $departureDay, Type::DATE);

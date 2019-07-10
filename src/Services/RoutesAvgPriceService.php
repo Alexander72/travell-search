@@ -30,9 +30,10 @@ class RoutesAvgPriceService
     public function getRouteAvgMonthPrice(int $month, ?City $origin, ?City $destination): ?float
     {
         $avgPrices = $this->getRouteAvgPrices(RoutesAvgPriceService::PERIOD_YEAR, $origin, $destination);
-        $avgPrices = array_filter($avgPrices, function($priceInfo)use($month){return $priceInfo['period'] == $month;})[0];
+        $avgPrices = array_filter($avgPrices, function($priceInfo)use($month){return $priceInfo['period'] == $month;});
+        $avgPrice = reset($avgPrices)['price'];
 
-        return reset($avgPrices);
+        return $avgPrice;
     }
 
     public function getRouteAvgPrices(string $period, ?City $origin, ?City $destination)

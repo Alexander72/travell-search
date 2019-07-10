@@ -23,23 +23,30 @@ class TelegramSubscribeService
         $this->twig = $twig;
     }
 
-    public function notify(array $subscribers, Route $route, float $monthAvgPrice)
+    public function notify(array $subscribes, Route $route, float $monthAvgPrice)
     {
-        foreach($subscribers as $subscriber)
+        foreach($subscribes as $subscribe)
         {
-            $this->notifySubscriber($subscriber, $route, $monthAvgPrice);
+            $this->notifySubscriber($subscribe, $route, $monthAvgPrice);
         }
     }
 
-    private function notifySubscriber(FlightAvgPriceSubscribe $subscriber, Route $route, float $monthAvgPrice)
+    private function notifySubscriber(FlightAvgPriceSubscribe $subscribe, Route $route, float $monthAvgPrice)
     {
-        $message = $this->buildMessage($subscriber, $route, $monthAvgPrice);
-        $this->telegramClient->sendMessage($subscriber->getChat(), $message);
+        $message = $this->buildMessage($subscribe, $route, $monthAvgPrice);
+        try
+        {
+            $this->telegramClient->sendMessage($subscribe->getChat(), $message);
+        }
+        catch(\Exception $e)
+        {
+
+        }
     }
 
-    private function buildMessage(FlightAvgPriceSubscribe $subscriber, Route $route, float $monthAvgPrice)
+    private function buildMessage(FlightAvgPriceSubscribe $subscribe, Route $route, float $monthAvgPrice)
     {
-        $data = ['subscriber' => $subscriber, 'route' => $route, 'monthAvgPrice' => $monthAvgPrice];
+        $data = ['subscribe' => $subscribe, 'route' => $route, 'monthAvgPrice' => $monthAvgPrice];
 
         return $this->twig->render('notification/telegram/notify-about-flight-price-drop.twig', $data);
     }

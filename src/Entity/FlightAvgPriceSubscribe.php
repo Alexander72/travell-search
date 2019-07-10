@@ -24,14 +24,14 @@ class FlightAvgPriceSubscribe
 
     /**
      * @ORM\ManyToOne(targetEntity="\App\Entity\City")
-     * @ORM\JoinColumn(nullable=false, referencedColumnName="code")
+     * @ORM\JoinColumn(nullable=true, referencedColumnName="code")
      * @var City|null
      */
     private $origin;
 
     /**
      * @ORM\ManyToOne(targetEntity="\App\Entity\City")
-     * @ORM\JoinColumn(nullable=false, referencedColumnName="code")
+     * @ORM\JoinColumn(nullable=true, referencedColumnName="code")
      * @var City|null
      */
     private $destination;
