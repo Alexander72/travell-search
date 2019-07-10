@@ -4,6 +4,7 @@ namespace App\Repository;
 
 use App\Entity\City;
 use App\Entity\Route;
+use App\Services\RoutesAvgPriceService;
 use DateTime;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Common\Collections\ArrayCollection;
@@ -154,11 +155,11 @@ class RouteRepository extends ServiceEntityRepository
         $valuesStartsFrom = 1;
         switch ($period)
         {
-            case 'year':
+            case RoutesAvgPriceService::PERIOD_YEAR:
                 $periodFormat = '%c';
                 $valuesCount = 12;
                 break;
-            case 'week':
+            case RoutesAvgPriceService::PERIOD_WEEK:
                 $periodFormat = '%w';
                 $valuesCount = 6;
                 $valuesStartsFrom = 0;

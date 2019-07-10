@@ -11,6 +11,10 @@ use Symfony\Contracts\Cache\ItemInterface;
 
 class RoutesAvgPriceService
 {
+    const PERIOD_YEAR = 'year';
+
+    const PERIOD_WEEK = 'week';
+
     private $routeRepository;
 
     private $cache;
@@ -23,7 +27,15 @@ class RoutesAvgPriceService
         $this->cache = $cache;
     }
 
-    public function getRouteAvgPrice(string $period, ?City $origin, ?City $destination)
+    public function getRouteAvgMonthPrice(int $month, ?City $origin, ?City $destination): ?float
+    {
+        $avgPrices = $this->getRouteAvgPrices(RoutesAvgPriceService::PERIOD_YEAR, $origin, $destination);
+        $avgPrices = array_filter($avgPrices, function($priceInfo)use($month){return $priceInfo['period'] == $month;})[0];
+
+        return reset($avgPrices);
+    }
+
+    public function getRouteAvgPrices(string $period, ?City $origin, ?City $destination)
     {
         $cacheKey = $this->getCacheKey($period, $origin, $destination);
         $data = $this->cache->get($cacheKey, function(ItemInterface $item) use ($period, $origin, $destination) {

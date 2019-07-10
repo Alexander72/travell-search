@@ -71,7 +71,7 @@ class RouteStatisticController extends AbstractController
             }
         }
 
-        $data = $this->avgPriceService->getRouteAvgPrice($periodType, $origin, $destination);
+        $data = $this->avgPriceService->getRouteAvgPrices($periodType, $origin, $destination);
 
         return new JsonResponse($data);
     }

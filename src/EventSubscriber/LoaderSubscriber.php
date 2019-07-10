@@ -5,10 +5,29 @@ namespace App\EventSubscriber;
 
 
 use App\Events\NewRouteLoadedEvent;
+use App\Repository\FlightAvgPriceSubscribeRepository;
+use App\Services\RoutesAvgPriceService;
+use App\Services\TelegramSubscribeService;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 
 class LoaderSubscriber implements EventSubscriberInterface
 {
+    private $routesAvgPriceService;
+
+    private $avgPriceSubscribeRepository;
+
+    private $telegramSubscribeService;
+
+    public function __construct(
+        RoutesAvgPriceService $routesAvgPriceService,
+        FlightAvgPriceSubscribeRepository $avgPriceSubscribeRepository,
+        TelegramSubscribeService $telegramSubscribeService
+    ) {
+        $this->routesAvgPriceService = $routesAvgPriceService;
+        $this->avgPriceSubscribeRepository = $avgPriceSubscribeRepository;
+        $this->telegramSubscribeService = $telegramSubscribeService;
+    }
+
     public static function getSubscribedEvents()
     {
         return [
@@ -19,7 +38,16 @@ class LoaderSubscriber implements EventSubscriberInterface
     public function onNewRouteLoaded(NewRouteLoadedEvent $event)
     {
         $route = $event->getRoute();
-        echo $route->getPrice()."\n";
+        $destination = $route->getDestination();
+        $origin = $route->getOrigin();
+
+        $monthAvgPrice = $this->routesAvgPriceService->getRouteAvgMonthPrice($route->getDepartureDay()->format('j'), $origin, $destination);
+        if($monthAvgPrice)
+        {
+            $percent = round($route->getPrice() / $monthAvgPrice * 100);
+            $subscribers = $this->avgPriceSubscribeRepository->getSubscribers($percent, $origin, $destination);
+            $this->telegramSubscribeService->notify($subscribers, $route, $monthAvgPrice);
+        }
     }
 
 }
