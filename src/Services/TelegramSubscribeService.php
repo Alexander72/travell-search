@@ -6,6 +6,7 @@ namespace App\Services;
 
 use App\Entity\Route;
 use App\Entity\FlightAvgPriceSubscribe;
+use Psr\Log\LoggerInterface;
 use TelegramBot\Api\Client;
 use Twig\Environment;
 
@@ -14,6 +15,7 @@ class TelegramSubscribeService
     private $telegramClient;
 
     private $twig;
+    private $logger;
 
     public function __construct(
         Client $telegramClient,
@@ -22,6 +24,7 @@ class TelegramSubscribeService
     ) {
         $this->telegramClient = $telegramClient;
         $this->twig = $twig;
+        $this->logger = $logger;
     }
 
     public function notify(array $subscribes, Route $route, float $monthAvgPrice)
