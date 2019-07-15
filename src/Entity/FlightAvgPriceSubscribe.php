@@ -54,6 +54,12 @@ class FlightAvgPriceSubscribe
      */
     private $to;
 
+    /**
+     * @ORM\Column(type="integer", nullable=true)
+     * @var int|null
+     */
+    private $price;
+
     public function getId(): ?int
     {
         return $this->id;
@@ -167,6 +173,25 @@ class FlightAvgPriceSubscribe
     public function setTo(?\Datetime $to): FlightAvgPriceSubscribe
     {
         $this->to = $to;
+
+        return $this;
+    }
+
+    /**
+     * @return int|null
+     */
+    public function getPrice(): ?int
+    {
+        return $this->price;
+    }
+
+    /**
+     * @param int|null $price
+     * @return FlightAvgPriceSubscribe
+     */
+    public function setPrice(?int $price): FlightAvgPriceSubscribe
+    {
+        $this->price = $price;
 
         return $this;
     }
