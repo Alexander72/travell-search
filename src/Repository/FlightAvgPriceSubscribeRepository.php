@@ -7,6 +7,7 @@ use App\Entity\FlightAvgPriceSubscribe;
 use DateTime;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\DBAL\Types\Type;
+use Doctrine\ORM\Query\Expr;
 use Symfony\Bridge\Doctrine\RegistryInterface;
 
 /**
@@ -23,23 +24,26 @@ class FlightAvgPriceSubscribeRepository extends ServiceEntityRepository
     }
 
     /**
-     * @param int       $maxPercent
+     * @param int $maxPercent
+     * @param int $maxPrice
+     * @param DateTime $departureDay
      * @param City|null $origin
      * @param City|null $destination
      *
      * @return FlightAvgPriceSubscribe[]
      */
-    public function getSubscribers(int $maxPercent, DateTime $departureDay, ?City $origin, ?City $destination): array
+    public function getSubscribers(int $maxPercent, int $maxPrice, DateTime $departureDay, ?City $origin, ?City $destination): array
     {
         $qb = $this->createQueryBuilder('s');
 
-        $qb->where('s.priceDropPercent <= :maxPercent');
+        $qb->where($qb->expr()->orX('s.priceDropPercent <= :maxPercent', 's.price >= :maxPrice'));
         $qb->andWhere('(s.origin = :origin OR s.origin IS NULL)');
         $qb->andWhere('(s.destination = :destination OR s.origin IS NULL)');
         $qb->andWhere('(s.from <= :departureDay OR s.from IS NULL)');
         $qb->andWhere('(s.to >= :departureDay OR s.to IS NULL)');
 
         $qb->setParameter('maxPercent', $maxPercent, Type::FLOAT);
+        $qb->setParameter('maxPrice', $maxPrice);
         $qb->setParameter('origin', $origin->getCode());
         $qb->setParameter('destination', $destination->getCode());
         $qb->setParameter('departureDay', $departureDay, Type::DATE);

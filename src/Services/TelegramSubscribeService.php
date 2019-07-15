@@ -17,7 +17,8 @@ class TelegramSubscribeService
 
     public function __construct(
         Client $telegramClient,
-        Environment $twig
+        Environment $twig,
+        LoggerInterface $logger
     ) {
         $this->telegramClient = $telegramClient;
         $this->twig = $twig;
@@ -40,7 +41,7 @@ class TelegramSubscribeService
         }
         catch(\Exception $e)
         {
-
+            $this->logger->error($e->getMessage());
         }
     }
 
