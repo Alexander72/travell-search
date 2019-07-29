@@ -37,7 +37,7 @@ class FlightAvgPriceSubscribeRepository extends ServiceEntityRepository
         $qb = $this->createQueryBuilder('s');
 
         $qb->where($qb->expr()->orX(
-            !is_null($maxPercent) ? 's.priceDropPercent <= :maxPercent' : '1=1',
+            !is_null($maxPercent) ? 's.priceDropPercent <= :maxPercent' : '1=0',
             's.price >= :maxPrice'
         ));
         $qb->andWhere('(s.origin = :origin OR s.origin IS NULL)');
