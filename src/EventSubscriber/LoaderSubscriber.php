@@ -42,14 +42,12 @@ class LoaderSubscriber implements EventSubscriberInterface
         $origin = $route->getOrigin();
 
         $monthAvgPrice = $this->routesAvgPriceService->getRouteAvgMonthPrice($route->getDepartureDay()->format('n'), $origin, $destination);
-        if($monthAvgPrice)
+
+        $dropPercent = $monthAvgPrice ? 100 - round($route->getPrice() / $monthAvgPrice * 100) : null;
+        $subscribers = $this->avgPriceSubscribeRepository->getSubscribers($dropPercent, $route->getPrice(), $route->getDepartureDay(), $origin, $destination);
+        if($subscribers)
         {
-            $dropPercent = 100 - round($route->getPrice() / $monthAvgPrice * 100);
-            $subscribers = $this->avgPriceSubscribeRepository->getSubscribers($dropPercent, $route->getPrice(), $route->getDepartureDay(), $origin, $destination);
-            if($subscribers)
-            {
-                $this->telegramSubscribeService->notify($subscribers, $route, $monthAvgPrice);
-            }
+            $this->telegramSubscribeService->notify($subscribers, $route, $monthAvgPrice);
         }
     }
 

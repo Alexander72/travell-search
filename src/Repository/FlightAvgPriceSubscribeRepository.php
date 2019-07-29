@@ -24,25 +24,32 @@ class FlightAvgPriceSubscribeRepository extends ServiceEntityRepository
     }
 
     /**
-     * @param int $maxPercent
-     * @param int $maxPrice
-     * @param DateTime $departureDay
+     * @param int|null  $maxPercent
+     * @param int       $maxPrice
+     * @param DateTime  $departureDay
      * @param City|null $origin
      * @param City|null $destination
      *
      * @return FlightAvgPriceSubscribe[]
      */
-    public function getSubscribers(int $maxPercent, int $maxPrice, DateTime $departureDay, ?City $origin, ?City $destination): array
+    public function getSubscribers(?int $maxPercent, int $maxPrice, DateTime $departureDay, ?City $origin, ?City $destination): array
     {
         $qb = $this->createQueryBuilder('s');
 
-        $qb->where($qb->expr()->orX('s.priceDropPercent <= :maxPercent', 's.price >= :maxPrice'));
+        $qb->where($qb->expr()->orX(
+            !is_null($maxPercent) ? 's.priceDropPercent <= :maxPercent' : '1=1',
+            's.price >= :maxPrice'
+        ));
         $qb->andWhere('(s.origin = :origin OR s.origin IS NULL)');
-        $qb->andWhere('(s.destination = :destination OR s.origin IS NULL)');
+        $qb->andWhere('(s.destination = :destination OR s.destination IS NULL)');
         $qb->andWhere('(s.from <= :departureDay OR s.from IS NULL)');
         $qb->andWhere('(s.to >= :departureDay OR s.to IS NULL)');
 
-        $qb->setParameter('maxPercent', $maxPercent, Type::FLOAT);
+        if(!is_null($maxPercent))
+        {
+            $qb->setParameter('maxPercent', $maxPercent);
+        }
+
         $qb->setParameter('maxPrice', $maxPrice);
         $qb->setParameter('origin', $origin->getCode());
         $qb->setParameter('destination', $destination->getCode());

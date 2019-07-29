@@ -27,7 +27,7 @@ class TelegramSubscribeService
         $this->logger = $logger;
     }
 
-    public function notify(array $subscribes, Route $route, float $monthAvgPrice)
+    public function notify(array $subscribes, Route $route, ?float $monthAvgPrice)
     {
         foreach($subscribes as $subscribe)
         {
@@ -35,7 +35,7 @@ class TelegramSubscribeService
         }
     }
 
-    private function notifySubscriber(FlightAvgPriceSubscribe $subscribe, Route $route, float $monthAvgPrice)
+    private function notifySubscriber(FlightAvgPriceSubscribe $subscribe, Route $route, ?float $monthAvgPrice)
     {
         $message = $this->buildMessage($subscribe, $route, $monthAvgPrice);
         try
@@ -48,7 +48,7 @@ class TelegramSubscribeService
         }
     }
 
-    private function buildMessage(FlightAvgPriceSubscribe $subscribe, Route $route, float $monthAvgPrice)
+    private function buildMessage(FlightAvgPriceSubscribe $subscribe, Route $route, ?float $monthAvgPrice)
     {
         $data = ['subscribe' => $subscribe, 'route' => $route, 'monthAvgPrice' => $monthAvgPrice];
 
