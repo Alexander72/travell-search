@@ -1,3 +1,3 @@
 Цена на перелет из {{ route.origin.name }} в {{ route.destination.name }}
 {{ route.departureDay|date('d.m.Y') }} числа {{ route.price }} рублей!
-Это ниже средней цены в этом месяце ({{ monthAvgPrice|round }} р.){% if monthAvgPrice %} на {{ (route.price / monthAvgPrice * 100)|round }}%{% endif %}
+Это ниже средней цены в этом месяце ({{ monthAvgPrice|round }} р.){% if monthAvgPrice %} на {{ 100 - (route.price / monthAvgPrice * 100)|round }}%{% endif %}
