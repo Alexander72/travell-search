@@ -6,6 +6,8 @@ namespace App\Services;
 
 use App\Entity\Route;
 use App\Entity\FlightAvgPriceSubscribe;
+use App\Entity\TelegramMessage;
+use Doctrine\ORM\EntityManagerInterface;
 use Psr\Log\LoggerInterface;
 use TelegramBot\Api\Client;
 use Twig\Environment;
@@ -15,16 +17,21 @@ class TelegramSubscribeService
     private $telegramClient;
 
     private $twig;
+
     private $logger;
+
+    private $entityManager;
 
     public function __construct(
         Client $telegramClient,
         Environment $twig,
-        LoggerInterface $logger
+        LoggerInterface $logger,
+        EntityManagerInterface $entityManager
     ) {
         $this->telegramClient = $telegramClient;
         $this->twig = $twig;
         $this->logger = $logger;
+        $this->entityManager = $entityManager;
     }
 
     public function notify(array $subscribes, Route $route, ?float $monthAvgPrice)
@@ -37,10 +44,18 @@ class TelegramSubscribeService
 
     private function notifySubscriber(FlightAvgPriceSubscribe $subscribe, Route $route, ?float $monthAvgPrice)
     {
-        $message = $this->buildMessage($subscribe, $route, $monthAvgPrice);
+        $text = $this->buildMessage($subscribe, $route, $monthAvgPrice);
         try
         {
-            $this->telegramClient->sendMessage($subscribe->getChat(), $message);
+            $message = new TelegramMessage();
+            $message->setDirection(TelegramMessage::DIRECTION_OUTCOME);
+            $message->setText($text);
+            $message->setDate(new \DateTime());
+            $message->setChatId($subscribe->getChat());
+
+            $this->entityManager->persist($message);
+
+            $this->telegramClient->sendMessage($subscribe->getChat(), $text);
         }
         catch(\Exception $e)
         {
