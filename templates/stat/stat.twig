@@ -1,5 +1,7 @@
 {% extends 'base.html.twig' %}
 {% block content %}
+    <p>Min price: {{ minPrice }}</p>
+    <p>Max price: {{ maxPrice }}</p>
     <div id="europe-flights-map" style="height: 800px"></div>
     <script>
         var routes = [
@@ -15,7 +17,7 @@
                     },
                     options: {
                         strokeWidth: 1,
-                        strokeColor: 'rgba({{ route.price * 255 }},{{ (1 -route.price) * 255 }},0,0.77)',
+                        strokeColor: 'rgba({{ route.price * 255 }},{{ (1 - route.price) * 255 }},0,1)',
                         greatArc: true
                     }
                 },

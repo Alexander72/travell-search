@@ -277,7 +277,10 @@ class RouteRepository extends ServiceEntityRepository
             FROM route r
             JOIN city o ON o.code = r.origin_id
             JOIN city d ON d.code = r.destination_id
+            WHERE DATE_FORMAT(r.departure_day, '%c') = 8
             GROUP BY o.lat, o.lon, d.lat, d.lon
+            ORDER BY price 
+            LIMIT 70
         ";
         return $query;
     }
