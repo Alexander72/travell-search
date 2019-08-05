@@ -44,5 +44,9 @@ services:
         arguments:
             - '%env(TELEGRAM_BOT_TOKEN)%'
 
+    App\Controller\TelegramController:
+        arguments:
+            - '%env(TELEGRAM_BOT_HOOK_TOKEN)%'
+
     # add more service definitions when explicit configuration is needed
     # please note that last definitions always *replace* previous ones

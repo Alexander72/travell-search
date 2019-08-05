@@ -15,11 +15,27 @@ use TelegramBot\Api\Types\Update;
 
 class TelegramController extends AbstractController
 {
+    private $telegramHookToken;
+
     /**
-     * @Route("/api/v1/telegram/hook", name="api_telegram_hook")
+     * TelegramController constructor.
+     * @param string $telegramHookToken
      */
-    public function hook(Client $bot, EntityManagerInterface $em)
+    public function __construct(string $telegramHookToken)
     {
+        $this->telegramHookToken = $telegramHookToken;
+    }
+
+    /**
+     * @Route("/api/v1/telegram/hook/{token}", name="api_telegram_hook")
+     */
+    public function hook(string $token, Client $bot, EntityManagerInterface $em)
+    {
+        if($token !== $this->telegramHookToken)
+        {
+            return new Response('', 403);
+        }
+
         $bot->command('echo', function(Message $message) use ($bot, $em) {
             $telegramMessage = new TelegramMessage();
             $telegramMessage->setDirection(TelegramMessage::DIRECTION_INCOME);
