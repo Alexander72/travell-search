@@ -44,6 +44,11 @@ services:
         arguments:
             - '%env(TELEGRAM_BOT_TOKEN)%'
 
+    App\Telegram\MessageEchoLogger: ~
+
+    App\Telegram\Interfaces\MessageLoggerInterface: '@App\Telegram\MessageEchoLogger'
+
+
     App\Controller\TelegramController:
         arguments:
             - '%env(TELEGRAM_BOT_HOOK_TOKEN)%'

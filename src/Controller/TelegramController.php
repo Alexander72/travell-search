@@ -49,6 +49,19 @@ class TelegramController extends AbstractController
             $bot->sendMessage($telegramMessage->getChatId(), $telegramMessage->getText());
         });
 
+        $bot->command('get_subscribes', function(Message $message) use ($bot, $em) {
+            $telegramMessage = new TelegramMessage();
+            $telegramMessage->setDirection(TelegramMessage::DIRECTION_INCOME);
+            $telegramMessage->setChatId($message->getChat()->getId());
+            $telegramMessage->setText($this>$this->render(''));
+            $telegramMessage->setDate(new \DateTime());
+            $telegramMessage->setMessageId($message->getMessageId());
+            $em->persist($telegramMessage);
+            $em->flush();
+
+            $bot->sendMessage($telegramMessage->getChatId(), $telegramMessage->getText());
+        });
+
         $rawBody = $bot->getRawBody();
         if($data = json_decode(preg_replace('/[\x00-\x1F\x80-\xFF]/', '', $rawBody), true))
         {
