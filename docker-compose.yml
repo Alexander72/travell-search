@@ -1,0 +1,37 @@
+version: '3.5'
+
+services:
+#  reverseproxy:
+#    image: nginx
+#    ports:
+#      - 80:80
+#      - 443:443
+#    restart: always
+#    volumes:
+#      - ./config/reverseproxy/ssl:/etc/nginx/ssl
+#      - ./config/reverseproxy/nginx.conf:/etc/nginx/nginx.conf
+#      - ./config/reverseproxy/conf.d/:/etc/nginx/conf.d
+#      - ../:/var/www/html/projects
+
+  db_master:
+    image: mysql:5.7
+    env_file:
+      - .env.local
+    ports:
+      - "3306:3306"
+    volumes:
+      - ../var/travell-search/data/mysql/master:/var/lib/mysql
+      - ../var/travell-search/log/mysql/master:/var/lib/mysql_logs
+    environment:
+      MYSQL_ROOT_PASSWORD: "password"
+
+  redis:
+    image: redis
+
+  flight_loader:
+    build:
+      context: .
+      dockerfile: flight-loader.Dockerfile
+    depends_on:
+      - redis
+      - db_master
